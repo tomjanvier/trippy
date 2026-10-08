@@ -1,183 +1,180 @@
-# TREK Cloudflare — version Workers
+# Trippy
 
-Portage **Cloudflare-native** du self-hosted [TREK](../TREK) (`liketrek/TREK`) :
-API **Hono** sur Workers + **D1** (métadonnées), **R2** (photos), **KV** (rate-limit,
-cache oEmbed), **Durable Objects** (temps réel par voyage), front React en
-**Static Assets**.
+Un carnet de voyage personnel, autohébergé sur Cloudflare Workers. La page
+d'accueil n'est pas une liste de voyages : c'est **la carte du monde**, avec les
+pays visités coloriés à l'encre et un fil qui les relie dans l'ordre des visites.
 
-## Client web
+Chaque pays a sa page : ce qu'on y retient en une ligne, le récit, les photos en
+planche-contact, et **les bonnes adresses** — le resto où tu reviendrais, le café
+où tu t'asseoirais une heure entière, l'hôtel où tu ne réfléchirais pas.
 
-Le front est **`web/`** — React 19 + Vite + Leaflet, écrit contre cette API.
-Le client d'origine `../TREK/client` **n'est pas utilisé** : il appelle ~477 routes
-(`admin` ×88, `trips` ×170, `journeys` ×34, `integrations` ×25, `addons` ×19…) alors
-que l'API Workers en expose bien moins ; le brancher faisait planter l'app au
-chargement (404 dès `/auth/me`, settings, app-config). Il reste dans le dépôt comme
-référence. Voir `frontend/README.md`.
+Trippy est un **fork modifié de [TREK](https://github.com/liketrek/TREK)**
+(licence AGPL-3.0), porté sur l'infrastructure Cloudflare. Voir
+[`MODIFIED.md`](MODIFIED.md) pour le détail du portage et des corrections, et
+[`NOTICE.md`](NOTICE.md) pour les attributions tierces.
 
-## Fonctionnalités
+> **Si tu clones ce dépôt :** tu le fais sous AGPL-3.0. Le §13 oblige quiconque
+> interagit avec le programme par le réseau à proposer le code source
+> correspondant ; c'est pourquoi le lien du dépôt est dans le pied de page de
+> l'application. Le `TRADEMARKS.md` de TREK interdit à un fork divergent de
+> reprendre le nom ou les logos d'origine : Trippy porte donc son propre nom et
+> son propre emblème.
 
-**Voyages** — CRUD, liste paginée (keyset), jours, lieux géolocalisés, import en lot
-(`nom | lat | lng | n° de jour`), édition inline, suppression atomique.
+---
 
-**Plan du jour** — `day_assignments` est la **source unique** de vérité du
-rattachement d'un lieu à un jour et de son ordre (la colonne `places.day_id` de la
-v0.1 a été supprimée en migration 0004 pour éviter une double vérité).
-`GET /api/trips/:id/plan` renvoie le plan Jour → lieux ordonnés ; réordonnancement
-par `POST /assignments/reorder`.
+## Ce que ça fait
 
-**Réservations & hébergements** — réservations typées (vol, train, ferry, restaurant,
-musée…), statut, confirmation, coût en centimes ; hébergements sur une plage de jours.
+**L'atlas** — la carte du monde en SVG, dessinée à partir des frontières Natural
+Earth, projetée en Natural Earth 1 (la projection des atlas scolaires, qui ne
+gonfle pas le Groenland). Les pays visités sont pleins ; l'intensité de l'encre
+encode le nombre d'allers-retours ; un **fil de voyage** relie les pays du plus
+ancien au plus récent par grands cercles, découpé sur la sphère. Chaque pays est
+cliquable, au clavier comme à la souris.
 
-**Budget** — montants en **centimes entiers**, catégories, répartition personnalisée
-par membre ; les parts doivent se réconcilier avec le total (`shares_must_sum_to_total`).
+**La table des matières** — la même information dans l'autre sens : celle du nom,
+que la carte ne sait pas donner. Une ligne par pays, drapeau, années, ce que tu
+en retiens. Les pays déjà vus dans tes journaux mais absents de la carte sont
+proposés en un clic.
 
-**Listes** — préparation (catégories, cochage, progression) et to-do (priorité, échéance).
+**La page d'un pays** — le récit, puis les photos, puis les bonnes adresses groupées
+par catégorie (manger, boire, dormir, voir, marcher, acheter) dans l'ordre dans
+lequel on cherche une adresse. Le champ `verdict` est la donnée : une phrase
+qu'on aura plaisir à relire dans deux ans.
 
-**Journal de voyage** (`journeys`) — récit daté, check-ins, photos géolocalisées
-(upload R2, Instagram, WordPress), pins déplaçables sur la carte, partage public.
+**Le reste de TREK** — voyages, plan par jour, lieux géolocalisés, budget en
+centimes, check-lists, réservations, hébergements, journaux, photos partagées sur
+la carte (upload R2, Instagram, WordPress), recherche et itinéraire sans clé
+(Photon, Nominatim, OSRM, Overpass), temps réel, partage par lien, hors-ligne.
 
-**Photos partagées sur la carte** — `GET /api/trips/:id/map-photos` (GeoJSON) et
-`GET /api/journeys/:id/map` ; couleur par source (upload / Instagram / WordPress).
+## Démarrer en local
 
-**Carte & recherche, sans clé** — recherche (Photon + Nominatim, dédupliquée),
-géocoding inverse au clic, itinéraire OSRM (voiture/marche/vélo), POI par catégorie
-via Overpass avec **miroir automatique** si l'endpoint public est saturé.
-
-**Partage** — lien public par voyage (`share_tokens`, drapeaux carte/photos, expiration,
-révocation) et par journal (`journeys.public_token`). Les binaires R2 restent privés :
-un lien public n'expose que les photos externes.
-
-**Temps réel** — Durable Object `TripRoom` (hibernation) : une room WebSocket par
-voyage, diffusion serveur → clients, anti-écho côté client.
-
-**Offline-first (PWA)** — c'est le cœur de l'original, porté ici :
-- `web/public/sw.js` : shell précaché, navigations réseau→cache, assets hachés
-  cache→réseau, lectures API mises en cache. Les écritures ne sont **jamais**
-  interceptées par le SW (elles passent par la file, sinon la clé d'idempotence
-  serait perdue).
-- `web/src/offline.ts` : file de mutations en IndexedDB, ordre préservé, rejeu
-  automatique au retour du réseau avec la `X-Idempotency-Key` d'origine.
-- Bandeau d'état réseau + nombre de modifications en attente.
-- Manifest + icônes : l'app est installable (iOS/Android) et démarre hors-ligne.
-
-**Intégrations** — Instagram via oEmbed public (lien public, sans token) et WordPress
-via REST `/media` + `/posts` (avec garde SSRF même-hôte).
-
-## Architecture
-
-```
-trek-cloudflare/
-  src/index.ts            Composition : middlewares, montage des routes, /ws, fallback SPA
-  src/routes/             auth, trips, days, places, assignments, planning (reservations,
-                          accommodations), tripdata (budget/packing/todos/tags/categories),
-                          photos, share, journeys, instagram, wordpress, maps, members,
-                          export, weather
-  src/realtime/TripRoom.ts Durable Object (hibernation)
-  src/lib/                http, validate, contracts, journey, geo, access, cache,
-                          ratelimit, notify, idempotency, export
-  src/db/client.ts        Helpers D1 + gardes d'accès
-  migrations/             0001 core · 0002 idempotence · 0003 index membres ·
-                          0004 planification (+ backfill assignations) · 0005 journal
-  web/                    Client React (Vite) → build vers ../public
-  tests/                  35 tests vitest (contrats, parseurs, curseurs, exports)
-  scripts/seed.mjs        Seed démo
-```
-
-| Origine (Nest + better-sqlite3) | Cloudflare |
-|---|---|
-| `server/src/db/*` (WAL, migrations positionnelles) | `migrations/*.sql` D1, `db.prepare().bind()`, `db.batch()` |
-| `nest/storage` (local/S3) | R2 (`photos/<trip>/…`, `journeys/<id>/…`) |
-| `nest/realtime` (`ws@8`) | Durable Object `TripRoom` + `/ws/trip/:id` |
-| `nest/share` (`share_tokens`) | idem en D1 + `GET /api/shared/:token` |
-| `nest/auth` (bcrypt) | JWT HS256 WebCrypto + PBKDF2 100k (cap Workers) |
-| `nest/maps` (Nominatim/OSRM/Overpass) | `src/lib/geo.ts`, mêmes services sans clé |
-| `client/dist` servi par Nest | Workers Static Assets (`./public`, fallback SPA) |
-
-## Démarrage
+Il faut Node 20+ et un compte Cloudflare gratuit.
 
 ```bash
-cd trek-cloudflare
 npm install
-cp .dev.vars.example .dev.vars      # JWT_SECRET, WP_SITE_URL…
-npx wrangler d1 create trek-db      # IDs déjà renseignés dans wrangler.jsonc
+npm --prefix web install
+
+cp .dev.vars.example .dev.vars
+# JWT_SECRET : openssl rand -hex 32
+
+npm run db:migrate:local     # crée le schéma D1
+npm run db:seed:local        # compte de démo + 9 pays d'exemple
+
+npm run dev                  # Worker sur :8787
+npm run frontend:dev         # Vite sur :5173, proxifie /api et /ws
+```
+
+Le compte de démo est `demo` / `trippy-demo-123` (ou `SEED_PASSWORD=…`).
+
+Pour que les données de démo ne restent pas : les pays sont dans `countries`,
+leurs adresses dans `spots` et leurs photos dans `country_photos`.
+
+## Déployer
+
+Les ressources existent déjà (D1 `trek-db`, R2 `trek-photos`, KV `SESSIONS`).
+Pour repartir de zéro :
+
+```bash
+npx wrangler d1 create trek-db        # puis recopier l'id dans wrangler.jsonc
 npx wrangler r2 bucket create trek-photos
 npx wrangler kv namespace create SESSIONS
-npm run db:migrate:local
-npm run db:seed:local               # compte démo
-npm run dev                         # API + worker sur :8787
-
-npm run frontend:dev                # front sur :5173 (proxy /api)
-npm run frontend:build              # web/ → ../public
+npx wrangler d1 migrations apply trek-db --remote
+npm run frontend:build                # web/ vers ./public — OBLIGATOIRE avant deploy
+npx wrangler secret put JWT_SECRET
 npm run deploy
 ```
 
-Secrets prod : `npx wrangler secret put JWT_SECRET`.
-
-## Endpoints
-
-| Méthode | Route | Auth |
-|---|---|---|
-| POST | `/api/auth/register`, `/login` (rate-limit 10/min/IP) | public |
-| GET | `/api/auth/me` | session |
-| GET/POST | `/api/trips`, `/api/trips/:id` (GET/PATCH/DELETE) | session / membre / owner |
-| GET/POST | `/api/trips/:id/days`, `/api/days/:dayId` | membre |
-| GET/POST | `/api/trips/:id/places`, `/places/bulk`, `/api/places/:placeId` | membre |
-| GET | `/api/trips/:id/plan` · `/assignments` · POST `/assignments/reorder` | membre (`?share=` pour `plan`) |
-| GET/POST/PATCH/DELETE | `/api/trips/:id/reservations`, `/accommodations` | membre |
-| GET/POST/PATCH/DELETE | `/api/trips/:id/budget`, `/packing`, `/todos` | membre |
-| GET/POST/DELETE | `/api/trips/:id/members`, `/api/tags`, `/api/categories` | membre / owner |
-| GET | `/api/trips/:id/map-photos` (GeoJSON) | membre ou `?share=` |
-| GET | `/api/trips/:id/export.gpx`, `/calendar.ics`, `/weather` | membre ou `?share=` |
-| GET | `/api/shared/:token` (edge-cache 60 s) | public |
-| GET/POST/PATCH/DELETE | `/api/journeys…`, `/entries`, `/checkins`, `/photos`, `/map`, `/share` | membre |
-| GET | `/api/public/journey/:token` | public |
-| GET | `/api/maps/search`, `/reverse`, `/trips/:id/route`, `/trips/:id/pois` | public / membre |
-| GET/POST | `/api/photos/instagram/preview` + pin, `/api/photos/wordpress/media|posts` + pin | public/session/membre |
-| WS | `/ws/trip/:id` (`?token=` ou `?share=`) | membre |
-
-Mutations rejouables via `X-Idempotency-Key`. La clé est **réservée avant
-traitement** (`status = 0`) : deux requêtes identiques simultanées ne peuvent donc
-pas appliquer l'effet deux fois — la perdante reçoit `425 Too Early` et le client
-réessaie. Une clé terminée rejoue la réponse mémorisée (`x-idempotent-replay`).
-
-## Idempotence : le piège du rejeu concurrent
-
-Écrire la clé **après** traitement ne protège de rien en concurrence : deux
-concurrence : deux requêtes identiques lisent toutes deux « clé absente » avant que
-la première n'écrive. La file hors-ligne rend ce cas réel (l'événement `online`
-peut déclencher deux rejeux). D'où : réservation atomique + verrou d'exclusion
-côté client. C'est vérifié par `tests/e2e/offline-queue.mjs`, qui échoue si un
-voyage est créé deux fois.
-
-## Sécurité
-
-- Session vérifiée sur chaque route ; `?share=` comme unique voie publique, avec
-  contrôle du token (expiration, drapeaux).
-- CORS en allowlist, `secureHeaders` sur `/api/*` uniquement (jamais sur le 101 du WS).
-- Rate-limit KV (fail-open) sur auth, upload et aperçu Insta.
-- Validation zod systématique (`.optional()` + `.nullable()` sur les PATCH) ;
-  montants entiers ≥ 0 ; parts de budget réconciliées.
-- WordPress : timeout, cap de réponse, garde SSRF même-hôte, auth optionnelle.
-- Géo : timeouts, plafonds de taille, bornes validées, User-Agent identification.
-
-## Limites assumées
-
-- Pas de plugins (`child_process`), MCP, OIDC/passkeys/TOTP, admin complet,
-  Atlas, Collections, Vacay, budget multi-devises — hors Workers ou hors MVP.
-- Le journal public n'expose pas les uploads R2 (seuls les liens externes).
-- oEmbed Instagram best-effort (rate-limit Meta possible) ; mode Graph API non câblé.
+> `frontend:build` vide `./public` puis y écrit le build. Déployer sans avoir
+> construit envoie l'application précédente. L'ordre est donc toujours
+> `frontend:build && deploy`.
 
 ## Vérifications
 
 ```bash
-npm run typecheck            # API
-npm test                     # 35 tests de contrats
-npm run frontend:build       # typecheck + build du front
+npm run typecheck        # le Worker (tsconfig.json) puis les tests (tsconfig.tests.json)
+npm test                 # 52 tests de contrats, dont 17 sur l'atlas
+npm run frontend:build   # typecheck + build du client
 npx wrangler deploy --dry-run
-
-# E2E navigateur (nécessite E2E_PASSWORD, et playwright chromium)
-E2E_PASSWORD='…' node tests/e2e/parcours.mjs       # parcours complet + PWA + hors-ligne
-E2E_PASSWORD='…' node tests/e2e/offline-queue.mjs  # file + absence de doublon
 ```
 
-Les deux e2e sont idempotents : ils nettoient les données qu'ils créent.
+Les tests sont des tests de **contrats** : ils vérifient les règles des schémas
+Zod et les fonctions pures, pas des requêtes HTTP. `tests/atlas.test.ts` couvre
+notamment le refus d'un code ISO en alpha-2 (qui ferait disparaître un pays de la
+carte sans message), la cohérence de la fenêtre de visite, et l'ordre du fil.
+`tests/project-identity.test.ts` compare les constantes de `src/lib/project.ts` et
+`web/src/identity.ts`, qui sont dupliquées pour une raison d'arbres de
+compilation et ne doivent jamais diverger.
+
+E2E navigateur (nécessite `E2E_PASSWORD` et le chromium de Playwright) :
+
+```bash
+E2E_PASSWORD='…' npm run test:e2e
+```
+
+## Architecture
+
+```
+src/index.ts        composition : middlewares, montage des routes, /ws, repli SPA
+src/routes/         auth · trips · days · places · assignments · planning ·
+                    tripdata · photos · share · journeys · atlas · maps · export
+src/lib/            http · validate · contracts · journey · atlas · geo · access ·
+                    cache · ratelimit · notify · idempotency · export · project
+src/realtime/       TripRoom (Durable Object, hibernation)
+migrations/         0001 core · 0002 idempotence · 0003 index · 0004 planification ·
+                    0005 journaux · 0006 atlas
+web/                client React 19 + Vite → build vers ../public
+tests/              52 tests vitest
+scripts/            seed.mjs · build-country-data.mjs · fetch-fonts.mjs ·
+                    apply-fork-transform.py
+```
+
+| Origine (TREK : Nest + better-sqlite3) | Trippy (Workers) |
+|---|---|
+| `server/src/db/*` (WAL, migrations positionnelles) | `migrations/*.sql` D1, `db.prepare().bind()`, `db.batch()` |
+| `nest/storage` (local / S3) | R2 (`photos/<tripId>/…`, `atlas/countries/<id>/…`) |
+| `nest/realtime` (`ws@8`) | Durable Object `TripRoom` + `/ws/trip/:id` |
+| `nest/auth` (bcrypt) | JWT HS256 WebCrypto + PBKDF2 100k |
+| `client/dist` servi par Nest | Workers Static Assets (`./public`, repli SPA) |
+
+### Pourquoi deux modèles : le voyage et le pays
+
+L'explication est dans l'en-tête de `migrations/0006_atlas.sql`, et c'est le point
+de conception le plus important du projet. Un **voyage** est daté et linéaire :
+trois jours en Islande. Un **pays** est un lieu de mémoire : on y revient, on y
+mange bien, on y a des photos de 2019 et de 2025. Les rattacher par `trip_id`
+serait une erreur de modèle — un pays n'appartient à aucun voyage. Donc
+`countries` n'a **aucun** `trip_id`, et supprimer un voyage ne fait pas
+disparaître des pays visités.
+
+L'identifiant du pays est le **code ISO 3166-1 numérique** (`iso_n3`), parce que
+c'est exactement l'identifiant des polygones Natural Earth : pas de table de
+correspondance entre la base et la carte. `web/src/data/countries.json` apporte le
+nom français et le drapeau, et est **généré** par
+`node scripts/build-country-data.mjs` puis commité — `Intl.DisplayNames` ne sait
+pas traduire un code numérique, et sa sortie dépend de la version d'ICU du
+runtime.
+
+### Régénérer les données
+
+```bash
+node scripts/build-country-data.mjs   # web/src/data/countries.json (250 pays)
+node scripts/fetch-fonts.mjs          # WOFF2 + web/src/fonts.css
+python3 scripts/apply-fork-transform.py --check   # 0 = fork à jour
+```
+
+## Limites assumées
+
+- **L'atlas n'a pas de lien public.** Le partage par lien existe pour les
+  voyages, pas pour l'atlas : c'est une vue personnelle. Les photos d'un pays
+  passent par la session, jamais par un jeton.
+- **Pas de temps réel sur l'atlas.** Une room `TripRoom` est attachée à un voyage ;
+  l'atlas n'en a pas. Il se relit au chargement, et la file hors ligne rejoue les
+  écritures comme le reste.
+- **Natural Earth en 1:110m.** 105 Ko plutôt que 739 Ko en 1:50m, et l'écart ne
+  porte que sur les micro-États. Un pays enregistré sans contour à cette échelle
+  est marqué « hors carte » dans la table des matières plutôt que de disparaître
+  sans explication.
+- **Pas de plugins, MCP, OIDC, admin, Atlas ni budget multi-devises** — hors MVP
+  Workers ou hors périmètre.
+- **Les données de démo sont inventées.** `scripts/seed.mjs` crée 9 pays et 12
+  adresses fictives pour que la carte ait quelque chose à montrer.

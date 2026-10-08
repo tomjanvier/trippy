@@ -6,7 +6,9 @@ import { extractToken, optionalAuth, verifySession } from "./auth";
 import { assertTripAccess, getShareByToken } from "./db/client";
 import { err } from "./lib/http";
 import { idempotency } from "./lib/idempotency";
+import { requireAuth } from "./auth";
 import authRoutes from "./routes/auth";
+import atlasRoutes from "./routes/atlas";
 import daysRoutes from "./routes/days";
 import { exportNested } from "./routes/export";
 import { instagramApi, instagramNested } from "./routes/instagram";
@@ -55,6 +57,9 @@ app.use("/api/*", idempotency);
 app.get("/api/health", (c) => c.json({ ok: true, service: "trippy", time: new Date().toISOString() }));
 
 app.route("/api/auth", authRoutes);
+// L'atlas est la page d'accueil : elle se monte avant les voyages pour que la
+// route la plus simple de l'application soit la première servie.
+app.route("/api/atlas", atlasRoutes);
 app.route("/api/trips", tripsRoutes);
 app.route("/api/trips", placesNested);
 app.route("/api/trips", photosNested);

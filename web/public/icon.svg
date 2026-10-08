@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192" role="img" aria-label="Trippy">
+  <rect width="192" height="192" rx="42" fill="#0E1116"/>
+  <!-- L'empreinte du tampon : un anneau d'encre terre cuite, ouvert en haut à
+       droite comme une frappe usée, et la marque du centre. Rien du logotype
+       TREK amont (son TRADEMARKS.md interdit aux forks divergents de
+       reprendre les marques). -->
+  <path d="M132 41 A58 58 0 1 0 151 60" fill="none" stroke="#B4553A" stroke-width="13" stroke-linecap="round"/>
+  <circle cx="96" cy="96" r="21" fill="#E8ECF1"/>
+</svg>

@@ -1,4 +1,10 @@
 {
+  // Le code du Worker : PAS de types Node. Le portage n'utilise `nodejs_compat`
+  // que pour `Buffer` (trois endroits, cf. src/lib/http.ts et src/lib/export.ts).
+  // Ajouter `@types/node` ici ferait entrer `process`, `fs` et `Buffer` dans le
+  // périmètre du Worker, et le typecheck ne rattraperait plus l'import d'un
+  // module Node côté serveur. Les tests tournent dans Node : ils ont donc leur
+  // propre tsconfig (tsconfig.tests.json), branché par `npm run typecheck`.
   "compilerOptions": {
     "target": "ES2022",
     "module": "ESNext",
@@ -12,5 +18,5 @@
     "verbatimModuleSyntax": true,
     "noUncheckedIndexedAccess": true
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts", "workers-env.d.ts"]
+  "include": ["src/**/*.ts", "workers-env.d.ts"]
 }

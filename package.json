@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "TREK adapté Cloudflare Workers : API Hono + D1 + R2 + Durable Objects, partage carte avec photos Instagram & WordPress",
+  "description": "TREK adapt\u00e9 Cloudflare Workers : API Hono + D1 + R2 + Durable Objects, partage carte avec photos Instagram & WordPress",
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
@@ -18,7 +18,7 @@
     "frontend:build": "npm --prefix web run build",
     "frontend:dev": "npm --prefix web run dev",
     "cf:tail": "wrangler tail",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.tests.json"
   },
   "dependencies": {
     "hono": "^4.12.16",
@@ -26,6 +26,8 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20261001.1",
+    "@types/node": "^26.6.4",
+    "i18n-iso-countries": "^7.14.0",
     "playwright": "^1.63.0",
     "typescript": "^5.9.2",
     "vitest": "^5.0.3",

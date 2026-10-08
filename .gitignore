@@ -3,9 +3,13 @@ dist/
 .dev.vars
 .wrangler/
 worker-configuration.d.ts
-# Build du front (npm run frontend:build -> web/ vers ./public) : artefact de
-# déploiement local, jamais commité.
-public/
+
+# Artefact de build : `npm run frontend:build` écrit web/ vers ./public, à la
+# racine. Le motif est ANCRÉ (`/public/`) sur purpose : sans l'ancre, il
+# ignorait aussi `web/public/`, donc les icônes, le manifest, le service worker et
+# les polices — c'est-à-dire toute la PWA disparaissait du dépôt.
+# Source de `web/public/` : ce dossier, versionné.
+/public/
 
 # Skills copiés depuis ~/Documents/shared-skills (voir shared-skills/install-into-project.sh).
 # Source de vérité : ce dossier-là, pas le dépôt.

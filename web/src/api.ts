@@ -545,3 +545,130 @@ export function photoUrl(url: string, shareToken?: string): string {
   if (shareToken && url.startsWith("/api/")) return `${url}${url.includes("?") ? "&" : "?"}share=${encodeURIComponent(shareToken)}`;
   return url;
 }
+// ---------- l'atlas ----------
+//
+// Le modèle par pays est distinct du modèle par voyage : un pays survit à ses
+// voyages. Les types ci-dessous sont le miroir de `src/routes/atlas.ts`, comme
+// le reste de ce fichier — pas de génération de code, donc une évolution du
+// schéma doit être répercutée des deux côtés.
+
+export interface Country {
+  id: number;
+  user_id: number;
+  /** Code ISO 3166-1 numérique : la clé des contours Natural Earth. */
+  iso_n3: number;
+  visited_from: string | null;
+  visited_to: string | null;
+  visits: number;
+  note: string | null;
+  story: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/** `GET /api/atlas` ajoute ces agrégats, calculés en SQL et non stockés. */
+export interface CountrySummary extends Country {
+  photos_count: number;
+  spots_count: number;
+  cover_r2_key: string | null;
+}
+
+export interface CountryPhoto {
+  id: number;
+  country_id: number;
+  r2_key: string | null;
+  external_url: string | null;
+  caption: string | null;
+  taken_on: string | null;
+  lat: number | null;
+  lng: number | null;
+  sort_order: number;
+  created_at: string;
+}
+
+export interface Spot {
+  id: number;
+  country_id: number;
+  name: string;
+  kind: string;
+  city: string | null;
+  /** La phrase qui vaut le coup d'être retenue. */
+  verdict: string | null;
+  price_cents: number | null;
+  url: string | null;
+  lat: number | null;
+  lng: number | null;
+  visited_on: string | null;
+  notes: string | null;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CountrySuggestion {
+  /** Code ISO alpha-2, celui que Nominatim rend dans les check-ins. */
+  country_code: string;
+  last_seen: string | null;
+}
+
+export const atlas = {
+  /** Charge utile de l'accueil : tous les pays, avec leurs compteurs. */
+  home: () =>
+    request<{ countries: CountrySummary[]; totals: { countries: number; photos: number; spots: number } }>(
+      "GET",
+      "/api/atlas",
+    ),
+  /** Table des matières paginée — l'accueil utilise `home`, cette route sert la
+   *  liste longue quand l'atlas dépasse une centaine de pays. */
+  list: (cursor?: string) =>
+    request<{ countries: Country[]; nextCursor: string | null }>(
+      "GET",
+      `/api/atlas/countries${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ""}`,
+    ),
+  suggestions: () => request<{ suggestions: CountrySuggestion[] }>("GET", "/api/atlas/suggestions"),
+  create: (b: {
+    iso_n3: number;
+    visited_from?: string | null;
+    visited_to?: string | null;
+    visits?: number | null;
+    note?: string | null;
+    story?: string | null;
+  }) => request<{ country: Country }>("POST", "/api/atlas/countries", b),
+  get: (id: number) =>
+    request<{ country: Country; photos: CountryPhoto[]; spots: Spot[] }>("GET", `/api/atlas/countries/${id}`),
+  update: (id: number, b: Partial<Pick<Country, "visited_from" | "visited_to" | "visits" | "note" | "story">>) =>
+    request<{ country: Country }>("PATCH", `/api/atlas/countries/${id}`, b),
+  remove: (id: number) => request<{ ok: true }>("DELETE", `/api/atlas/countries/${id}`),
+
+  // -- photos. L'upload part en multipart : `request()` ne met PAS les FormData
+  // en file hors ligne (un binaire ne se rejoue pas), donc elle échoue si le
+  // -- réseau manque, ce qui est le comportement correct pour une photo.
+  uploadPhoto: (countryId: number, form: FormData) =>
+    request<{ photo: CountryPhoto }>("POST", `/api/atlas/countries/${countryId}/photos`, form).then((r) => r.photo),
+  linkPhoto: (countryId: number, b: { external_url: string; caption?: string | null; taken_on?: string | null }) =>
+    request<{ photo: CountryPhoto }>("POST", `/api/atlas/countries/${countryId}/photos`, b).then((r) => r.photo),
+  updatePhoto: (photoId: number, b: Partial<Pick<CountryPhoto, "caption" | "taken_on" | "sort_order">>) =>
+    request<{ photo: CountryPhoto }>("PATCH", `/api/atlas/photos/${photoId}`, b).then((r) => r.photo),
+  removePhoto: (photoId: number) => request<{ ok: true }>("DELETE", `/api/atlas/photos/${photoId}`),
+  photoFile: (photoId: number) => `/api/atlas/photos/${photoId}/file`,
+
+  // -- bonnes adresses
+  addSpot: (
+    countryId: number,
+    b: {
+      name: string;
+      kind?: string;
+      city?: string | null;
+      verdict?: string | null;
+      price_cents?: number | null;
+      url?: string | null;
+      lat?: number | null;
+      lng?: number | null;
+      visited_on?: string | null;
+      notes?: string | null;
+    },
+  ) => request<{ spot: Spot }>("POST", `/api/atlas/countries/${countryId}/spots`, b).then((r) => r.spot),
+  updateSpot: (spotId: number, b: Partial<Pick<Spot, "name" | "kind" | "city" | "verdict" | "price_cents" | "url" | "notes" | "sort_order">>) =>
+    request<{ spot: Spot }>("PATCH", `/api/atlas/spots/${spotId}`, b).then((r) => r.spot),
+  removeSpot: (spotId: number) => request<{ ok: true }>("DELETE", `/api/atlas/spots/${spotId}`),
+};

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192" role="img" aria-label="Trippy">
+  <rect width="192" height="192" fill="#0E1116"/>
+  <!-- Variante « maskable » : le gabarit Android.maskable rogne jusqu'à 20 %
+       de chaque bord, donc l'empreinte est réduite et recentrée pour rester
+       entière dans la zone sûre. -->
+  <path d="M127 57 A44 44 0 1 0 141 71" fill="none" stroke="#B4553A" stroke-width="11" stroke-linecap="round"/>
+  <circle cx="96" cy="96" r="16" fill="#E8ECF1"/>
+</svg>
