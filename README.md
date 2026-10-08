@@ -69,6 +69,14 @@ Le compte de démo est `demo` / `trippy-demo-123` (ou `SEED_PASSWORD=…`).
 Pour que les données de démo ne restent pas : les pays sont dans `countries`,
 leurs adresses dans `spots` et leurs photos dans `country_photos`.
 
+Mot de passe oublié ? Le hachage est PBKDF2 salé, donc il n'est pas récupérable —
+mais il se remet, directement sur D1, sans passer par l'API :
+
+```bash
+PASSWORD='…' node scripts/reset-password.mjs --email demo@trippy.local --remote
+# sans PASSWORD : le script en génère un et l'affiche
+```
+
 ## Déployer
 
 Les ressources existent déjà (D1 `trek-db`, R2 `trek-photos`, KV `SESSIONS`).
@@ -125,7 +133,7 @@ migrations/         0001 core · 0002 idempotence · 0003 index · 0004 planific
 web/                client React 19 + Vite → build vers ../public
 tests/              52 tests vitest
 scripts/            seed.mjs · build-country-data.mjs · fetch-fonts.mjs ·
-                    apply-fork-transform.py
+                    reset-password.mjs · apply-fork-transform.py
 ```
 
 | Origine (TREK : Nest + better-sqlite3) | Trippy (Workers) |
@@ -160,6 +168,7 @@ runtime.
 node scripts/build-country-data.mjs   # web/src/data/countries.json (250 pays)
 node scripts/fetch-fonts.mjs          # WOFF2 + web/src/fonts.css
 python3 scripts/apply-fork-transform.py --check   # 0 = fork à jour
+node scripts/reset-password.mjs --email <adresse> [--remote]
 ```
 
 ## Limites assumées
