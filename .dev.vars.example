@@ -1,0 +1,19 @@
+# Copier vers .dev.vars (jamais commité) pour `wrangler dev`
+# JWT secret HS256 pour les sessions (générer avec: openssl rand -hex 32)
+JWT_SECRET=change-me-dev-secret-min-32-chars
+
+# WordPress perso (laisser vide tant que l'URL n'est pas connue)
+# Exemple: https://monblog.fr
+WP_SITE_URL=
+# Optionnel: compte WP applicatif si médias privés
+# WP_USERNAME=
+# WP_APP_PASSWORD=
+
+# Instagram : mode "embed public" par défaut = aucun secret requis.
+# Les liens publics https://www.instagram.com/p/<id>/ sont résolus via oEmbed.
+# Optionnel (mode Graph API avancé) :
+# INSTAGRAM_APP_ID=
+# INSTAGRAM_APP_SECRET=
+# INSTAGRAM_ACCESS_TOKEN=
+# Token long-lived obtenu via Meta Developers (portée instagram_basic + pages_show_list).
+# Si absent, /api/photos/instagram renvoie uniquement le mode embed.

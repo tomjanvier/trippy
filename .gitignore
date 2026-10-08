@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.dev.vars
+.wrangler/
+worker-configuration.d.ts
+# Build du front (npm run frontend:build -> web/ vers ./public) : artefact de
+# déploiement local, jamais commité.
+public/
+
+# Skills copiés depuis ~/Documents/shared-skills (voir shared-skills/install-into-project.sh).
+# Source de vérité : ce dossier-là, pas le dépôt.
+.agents/
+
+# OS
+.DS_Store

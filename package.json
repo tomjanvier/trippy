@@ -1,0 +1,34 @@
+{
+  "name": "trek-cloudflare",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "TREK adapté Cloudflare Workers : API Hono + D1 + R2 + Durable Objects, partage carte avec photos Instagram & WordPress",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "types": "wrangler types",
+    "test": "vitest run",
+    "test:e2e": "node tests/e2e/parcours.mjs && node tests/e2e/offline-queue.mjs",
+    "db:create": "wrangler d1 create trek-db",
+    "db:migrate:local": "wrangler d1 migrations apply trek-db --local",
+    "db:migrate:remote": "wrangler d1 migrations apply trek-db --remote",
+    "db:seed:local": "node scripts/seed.mjs",
+    "db:seed:remote": "node scripts/seed.mjs --remote",
+    "frontend:build": "npm --prefix web run build",
+    "frontend:dev": "npm --prefix web run dev",
+    "cf:tail": "wrangler tail",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "hono": "^4.12.16",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261001.1",
+    "playwright": "^1.63.0",
+    "typescript": "^5.9.2",
+    "vitest": "^5.0.3",
+    "wrangler": "^4.42.0"
+  }
+}

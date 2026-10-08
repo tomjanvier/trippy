@@ -1,0 +1,55 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "trek-cloudflare",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-05",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true,
+    "traces": { "enabled": true }
+  },
+  "vars": {
+    "APP_URL": "https://trek-cloudflare.tckgrg9ytv.workers.dev",
+    "WP_SITE_URL": "",
+    "MAP_DEFAULT_STYLE": "https://tiles.openfreemap.org/styles/liberty"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "trek-db",
+      "database_id": "db791657-a4e6-4b08-9001-10dbcc0effba",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "PHOTOS_BUCKET",
+      "bucket_name": "trek-photos"
+    }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "SESSIONS",
+      "id": "604934b0777146f993539741162a0cfb"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "TRIP_ROOM",
+        "class_name": "TripRoom"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["TripRoom"]
+    }
+  ],
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application"
+  }
+}
