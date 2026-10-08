@@ -9,7 +9,7 @@
  * être appliquées dans l'ordre où l'utilisateur les a faites.
  */
 
-const DB_NAME = "trek-offline";
+const DB_NAME = "trippy-offline";
 const STORE = "mutations";
 const META = "meta";
 
@@ -166,7 +166,7 @@ export function replayQueue(): Promise<{ sent: number; failed: number }> {
 
 function getTokenHeader(): string | null {
   try {
-    return localStorage.getItem("trek_token");
+    return localStorage.getItem("trippy_token");
   } catch {
     return null;
   }
@@ -181,7 +181,7 @@ async function notifyAll(): Promise<void> {
 export function startAutoReplay(): () => void {
   const run = () => {
     void replayQueue().then((r) => {
-      if (r.sent > 0) window.dispatchEvent(new CustomEvent("trek:replayed", { detail: r }));
+      if (r.sent > 0) window.dispatchEvent(new CustomEvent("trippy:replayed", { detail: r }));
     });
   };
   window.addEventListener("online", run);

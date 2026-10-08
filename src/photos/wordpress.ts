@@ -1,5 +1,6 @@
 import type { D1Database } from "@cloudflare/workers-types";
 import type { Env } from "../env";
+import { USER_AGENT } from "../lib/project";
 
 export interface WpMedia {
   id: number;
@@ -37,7 +38,7 @@ function siteOf(env: Env): string | null {
 }
 
 function wpHeaders(env: Env): Record<string, string> {
-  const h: Record<string, string> = { "user-agent": "trek-cloudflare/0.1 (+wordpress-sync)" };
+  const h: Record<string, string> = { "user-agent": USER_AGENT };
   if (env.WP_USERNAME && env.WP_APP_PASSWORD) {
     h.authorization = `Basic ${btoa(`${env.WP_USERNAME}:${env.WP_APP_PASSWORD}`)}`;
   }

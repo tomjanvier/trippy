@@ -60,7 +60,7 @@ export function SharedTrip({ token }: { token: string }) {
   return (
     <div className="app">
       <header className="topbar">
-        <h1>TREK — partage</h1>
+        <h1>Trippy — partage</h1>
         <span className="spacer" />
         <span className="muted">lecture seule</span>
       </header>

@@ -65,9 +65,14 @@ exportNested.get("/:id/calendar.ics", async (c) => {
   if (!authz) return err(c, "unauthorized", 401);
   const trip = authz.trip;
   const { results } = await c.env.DB.prepare(
+    // Le rattachement jour ↔ lieu vit dans `day_assignments` (source unique de
+    // vérité depuis la migration 0004) ; `places.day_id` n'existe plus. L'ordre
+    // du plan est `order_index`, pas `p.id`.
     `SELECT d.day_number, d.date, d.title, p.name AS place_name
-     FROM days d LEFT JOIN places p ON p.day_id = d.id
-     WHERE d.trip_id = ? ORDER BY d.day_number, p.id`,
+     FROM days d
+     LEFT JOIN day_assignments a ON a.day_id = d.id
+     LEFT JOIN places p ON p.id = a.place_id
+     WHERE d.trip_id = ? ORDER BY d.day_number, a.order_index`,
   ).bind(tripId).all<{ day_number: number; date: string | null; title: string | null; place_name: string | null }>();
   const byNum = new Map<number, { date: string | null; title: string | null; places: string[] }>();
   for (const r of results) {

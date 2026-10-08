@@ -136,20 +136,23 @@ placesApi.patch("/:placeId", requireAuth, async (c) => {
   push("notes", b.notes);
   push("image_url", b.image_url);
   push("website", b.website);
-  if (!sets.length) return err(c, "bad_request", 400);
-  sets.push("updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now')");
-  await c.env.DB.prepare(`UPDATE places SET ${sets.join(", ")} WHERE id = ?`).bind(...binds, placeId).run();
+  const reassignsDay = b.day_id !== undefined;
+  // `day_id` est un champ virtuel : il agit sur `day_assignments`, pas sur la
+  // ligne `places`. Un PATCH qui ne déplace que le lieu est donc valide même
+  // sans aucun champ scalaire — tester `sets` seul le rendait impossible.
+  if (!sets.length && !reassignsDay) return err(c, "bad_request", 400);
+  if (sets.length) {
+    sets.push("updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now')");
+    await c.env.DB.prepare(`UPDATE places SET ${sets.join(", ")} WHERE id = ?`).bind(...binds, placeId).run();
+  }
   // Rattachement de jour : null = retirer le lieu de tous les jours.
-  if (b.day_id !== undefined) {
+  if (reassignsDay) {
     await c.env.DB.prepare("DELETE FROM day_assignments WHERE place_id = ?").bind(placeId).run();
     if (b.day_id !== null) {
       const next = ((await c.env.DB.prepare("SELECT COALESCE(MAX(order_index), -1) AS m FROM day_assignments WHERE day_id = ?").bind(b.day_id).first<{ m: number }>())?.m ?? -1) + 1;
       await c.env.DB.prepare("INSERT INTO day_assignments (day_id, place_id, order_index) VALUES (?, ?, ?)").bind(b.day_id, placeId, next).run();
     }
   }
-  if (!sets.length) return err(c, "bad_request", 400);
-  sets.push("updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now')");
-  await c.env.DB.prepare(`UPDATE places SET ${sets.join(", ")} WHERE id = ?`).bind(...binds, placeId).run();
   const place = await getPlace(c.env.DB, placeId);
   notifyTrip(c, resolved.trip.id, { type: "place.updated", tripId: resolved.trip.id, place });
   return c.json({ place });

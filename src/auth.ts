@@ -64,7 +64,7 @@ export async function verifySession(secret: string, token: string): Promise<Sess
 
 export function extractToken(c: Context<{ Bindings: Env }>): string | null {
   const cookie = c.req.header("cookie") ?? "";
-  const m = cookie.match(/(?:^|;\s*)trek_session=([^;]+)/);
+  const m = cookie.match(/(?:^|;\s*)trippy_session=([^;]+)/);
   if (m?.[1]) return decodeURIComponent(m[1]);
   const auth = c.req.header("authorization");
   if (auth?.startsWith("Bearer ")) return auth.slice(7);

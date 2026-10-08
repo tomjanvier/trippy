@@ -29,8 +29,8 @@ export function Trips({ user: _user }: { user: User }) {
   useEffect(() => {
     void load();
     const onReplayed = () => void load();
-    window.addEventListener("trek:replayed", onReplayed);
-    return () => window.removeEventListener("trek:replayed", onReplayed);
+    window.addEventListener("trippy:replayed", onReplayed);
+    return () => window.removeEventListener("trippy:replayed", onReplayed);
   }, [load]);
 
   async function create(e: React.FormEvent) {

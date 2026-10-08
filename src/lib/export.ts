@@ -23,7 +23,7 @@ export function buildGpx(tripTitle: string, points: GpxPoint[]): string {
         `</wpt>`,
     )
     .join("\n");
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="trek-cloudflare" xmlns="http://www.topografix.com/GPX/1/1">\n<metadata><name>${escXml(tripTitle.slice(0, 200))}</name></metadata>\n${wpts}\n</gpx>`;
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="trippy" xmlns="http://www.topografix.com/GPX/1/1">\n<metadata><name>${escXml(tripTitle.slice(0, 200))}</name></metadata>\n${wpts}\n</gpx>`;
 }
 
 export interface IcsDay {
@@ -68,7 +68,7 @@ export function buildIcs(tripTitle: string, tripId: number, days: IcsDay[]): { i
     const desc = d.places.length ? d.places.join(", ") : "";
     const lines = [
       "BEGIN:VEVENT",
-      `UID:trip-${tripId}-day-${d.n}@trek-cloudflare`,
+      `UID:trip-${tripId}-day-${d.n}@trippy`,
       `DTSTAMP:${stamp}`,
       `DTSTART;VALUE=DATE:${dt}`,
       `SUMMARY:${escIcsText(summary.slice(0, 200))}`,
@@ -77,7 +77,7 @@ export function buildIcs(tripTitle: string, tripId: number, days: IcsDay[]): { i
     lines.push("END:VEVENT");
     return lines.map(foldIcsLine).join("\r\n");
   });
-  const ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//trek-cloudflare//trip//FR", ...events, "END:VCALENDAR"].join("\r\n");
+  const ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//trippy//trip//FR", ...events, "END:VCALENDAR"].join("\r\n");
   return { ics, count: events.length };
 }
 

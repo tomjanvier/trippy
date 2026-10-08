@@ -23,7 +23,7 @@ describe("buildIcs", () => {
     ]);
     expect(count).toBe(1);
     expect(ics).toContain("BEGIN:VCALENDAR");
-    expect(ics).toContain("UID:trip-1-day-1@trek-cloudflare");
+    expect(ics).toContain("UID:trip-1-day-1@trippy");
     expect(ics).toContain("DTSTART;VALUE=DATE:20260701");
     expect(ics).toContain("SUMMARY:Islande — J1 : Arrivée");
     expect(ics).toContain("DESCRIPTION:Geysir\\, Gullfoss");

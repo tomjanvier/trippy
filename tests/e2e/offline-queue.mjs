@@ -9,7 +9,7 @@
  */
 import { chromium } from "playwright";
 
-const B = process.env.BASE_URL ?? "https://trek-cloudflare.tckgrg9ytv.workers.dev";
+const B = process.env.BASE_URL ?? "https://trippy.tckgrg9ytv.workers.dev";
 const EMAIL = process.env.E2E_EMAIL ?? "demo@trek.local";
 const PASSWORD = process.env.E2E_PASSWORD ?? "";
 const TITLE = "Voyage hors-ligne";

@@ -17,7 +17,6 @@ export interface TripRow {
 export interface PlaceRow {
   id: number;
   trip_id: number;
-  day_id: number | null;
   name: string;
   description: string | null;
   lat: number | null;

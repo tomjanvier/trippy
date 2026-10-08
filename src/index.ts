@@ -52,7 +52,7 @@ app.use(
 app.use("/api/*", optionalAuth);
 app.use("/api/*", idempotency);
 
-app.get("/api/health", (c) => c.json({ ok: true, service: "trek-cloudflare", time: new Date().toISOString() }));
+app.get("/api/health", (c) => c.json({ ok: true, service: "trippy", time: new Date().toISOString() }));
 
 app.route("/api/auth", authRoutes);
 app.route("/api/trips", tripsRoutes);

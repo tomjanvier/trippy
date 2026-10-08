@@ -5,6 +5,7 @@ import { userIdOf } from "../lib/access";
 import { cachedJson } from "../lib/cache";
 import { openMeteoUrl } from "../lib/export";
 import { err } from "../lib/http";
+import { USER_AGENT } from "../lib/project";
 
 /**
  * Météo du voyage via Open-Meteo (sans clé) : centroïde des lieux
@@ -46,7 +47,7 @@ weatherNested.get("/:id/weather", async (c) => {
     try {
       const res = await fetch(openMeteoUrl(lat, lng, start, end), {
         signal: ctrl.signal,
-        headers: { "user-agent": "trek-cloudflare/0.2 (+weather)" },
+        headers: { "user-agent": USER_AGENT },
       });
       if (!res.ok) return err(c, "weather_upstream_error", 502);
       const body = (await res.json()) as { daily?: Record<string, (number | string | null)[]> };

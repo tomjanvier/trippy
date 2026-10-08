@@ -71,7 +71,7 @@ auth.post("/register", async (c) => {
     const maxAge = 30 * 24 * 3600;
     const token = await signSession(c.env.JWT_SECRET, user, maxAge);
     return c.json({ user, token }, 200, {
-      "Set-Cookie": `trek_session=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}`,
+      "Set-Cookie": `trippy_session=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}`,
     });
   } catch {
     return err(c, "username_or_email_taken", 409);
@@ -103,12 +103,12 @@ auth.post("/login", async (c) => {
   const maxAge = parsed.data.remember_me ? 90 * 24 * 3600 : 30 * 24 * 3600;
   const token = await signSession(c.env.JWT_SECRET, user, maxAge);
   return c.json({ user, token }, 200, {
-    "Set-Cookie": `trek_session=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}`,
+    "Set-Cookie": `trippy_session=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}`,
   });
 });
 
 auth.post("/logout", (c) =>
-  c.json({ ok: true }, 200, { "Set-Cookie": "trek_session=; Path=/; HttpOnly; Max-Age=0" }),
+  c.json({ ok: true }, 200, { "Set-Cookie": "trippy_session=; Path=/; HttpOnly; Max-Age=0" }),
 );
 
 auth.get("/me", requireAuth, (c) => c.json({ user: c.get("user") }));

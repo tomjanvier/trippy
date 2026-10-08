@@ -40,7 +40,6 @@ export interface Day {
 export interface Place {
   id: number;
   trip_id: number;
-  day_id: number | null;
   name: string;
   description: string | null;
   lat: number | null;
@@ -172,7 +171,7 @@ export interface TodoItem {
   sort_order: number;
 }
 
-const TOKEN_KEY = "trek_token";
+const TOKEN_KEY = "trippy_token";
 
 export function getToken(): string | null {
   try {
@@ -399,6 +398,17 @@ export const places = {
   update: (placeId: number, b: Partial<{ name: string; lat: number | null; lng: number | null; day_id: number | null; notes: string }>) =>
     request<{ place: Place }>("PATCH", `/api/places/${placeId}`, b).then((r) => r.place),
   remove: (placeId: number) => request<{ ok: true }>("DELETE", `/api/places/${placeId}`),
+  /**
+   * Rattachement jour ↔ lieu. `places.day_id` a été supprimé du schéma en
+   * migration 0004 : la seule source de vérité est `day_assignments`, exposé
+   * par /plan. Seul un lieu retenu à un jour apparaît ici.
+   */
+  dayOf: async (tripId: number): Promise<Map<number, number>> => {
+    const plan = await trips.plan(tripId);
+    const m = new Map<number, number>();
+    for (const d of plan.days) for (const it of d.items) if (!m.has(it.place_id)) m.set(it.place_id, d.id);
+    return m;
+  },
 };
 
 // ---------- carte : recherche, routes, POI ----------

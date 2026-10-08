@@ -1,4 +1,5 @@
 import type { Env } from "../env";
+import { USER_AGENT } from "./project";
 
 /**
  * Clients des API géographiques publiques, sans clé, comme le TREK d'origine :
@@ -11,7 +12,7 @@ import type { Env } from "../env";
  * validation des bornes, et User-Agent identifiant (Nominatim l'exige).
  */
 
-const UA = "trek-cloudflare/0.3 (self-hosted travel planner)";
+const UA = USER_AGENT;
 
 export interface FetchOpts {
   timeoutMs?: number;

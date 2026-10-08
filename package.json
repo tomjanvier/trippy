@@ -1,6 +1,6 @@
 {
-  "name": "trek-cloudflare",
-  "version": "0.2.0",
+  "name": "trippy",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "description": "TREK adapté Cloudflare Workers : API Hono + D1 + R2 + Durable Objects, partage carte avec photos Instagram & WordPress",

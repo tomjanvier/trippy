@@ -57,7 +57,9 @@ days.delete("/:dayId", requireAuth, async (c) => {
   const dayId = Number(c.req.param("dayId"));
   const resolved = await tripFromDay(c.env.DB, dayId, uid);
   if (!resolved) return err(c, "not_found", 404);
-  // FK : places.day_id passe à NULL automatiquement.
+  // Le rattachement jour ↔ lieu est porté par `day_assignments`, dont les lignes
+  // partent en cascade avec le jour (`ON DELETE CASCADE`). La colonne
+  // `places.day_id` a été supprimée en migration 0004 et n'est plus à=nullée.
   await c.env.DB.prepare("DELETE FROM days WHERE id = ?").bind(dayId).run();
   notifyTrip(c, resolved.trip.id, { type: "day.deleted", tripId: resolved.trip.id });
   return c.json({ ok: true });

@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "trek-cloudflare",
+  "name": "trippy",
   "main": "src/index.ts",
   "compatibility_date": "2026-10-05",
   "compatibility_flags": ["nodejs_compat"],
@@ -9,7 +9,7 @@
     "traces": { "enabled": true }
   },
   "vars": {
-    "APP_URL": "https://trek-cloudflare.tckgrg9ytv.workers.dev",
+    "APP_URL": "https://trippy.tckgrg9ytv.workers.dev",
     "WP_SITE_URL": "",
     "MAP_DEFAULT_STYLE": "https://tiles.openfreemap.org/styles/liberty"
   },

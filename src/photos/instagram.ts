@@ -1,5 +1,6 @@
 import type { D1Database } from "@cloudflare/workers-types";
 import type { Env } from "../env";
+import { USER_AGENT } from "../lib/project";
 
 /** --- Instagram : mode "embed public" (sans token) --- */
 
@@ -29,7 +30,7 @@ export async function fetchInstagramOEmbed(postUrl: string): Promise<InstagramEm
     const endpoint = `https://www.instagram.com/api/v1/oembed/?url=${encodeURIComponent(postUrl)}`;
     const res = await fetch(endpoint, {
       signal: ctrl.signal,
-      headers: { "user-agent": "trek-cloudflare/0.1 (+map-share)" },
+      headers: { "user-agent": USER_AGENT },
     });
     if (!res.ok) return null;
     const body = (await res.json()) as {

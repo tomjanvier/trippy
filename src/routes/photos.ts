@@ -121,7 +121,7 @@ photosNested.get("/:id/photos/:photoId/file", async (c) => {
     const hit = await cache.match(cacheKey).catch(() => null);
     if (hit) {
       const h = new Response(hit.body, hit);
-      h.headers.set("x-trek-cache", "HIT");
+      h.headers.set("x-trippy-cache", "HIT");
       return h;
     }
   }

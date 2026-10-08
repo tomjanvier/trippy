@@ -19,6 +19,8 @@ export function TripDetail({ id }: { id: number }) {
   const [info, setInfo] = useState<string | null>(null);
   const [draft, setDraft] = useState<{ lat: number; lng: number } | null>(null);
   const [draftName, setDraftName] = useState("");
+  /** placeId → dayId, reconstruit depuis /plan (le schéma n'a plus places.day_id). */
+  const [dayOf, setDayOf] = useState<Map<number, number>>(() => new Map());
 
   const load = useCallback(async () => {
     setErr(null);
@@ -30,6 +32,7 @@ export function TripDetail({ id }: { id: number }) {
       setShare(d.share);
       setShares(await trips.photoShares(id));
       setFeatures((await trips.mapPhotos(id)).features);
+      places.dayOf(id).then(setDayOf).catch(() => setDayOf(new Map()));
       trips
         .weather(id)
         .then((w) => {
@@ -143,7 +146,7 @@ export function TripDetail({ id }: { id: number }) {
       )}
 
       <div className="grid two">
-        <PlacesCard tripId={id} places={list} days={days} onChanged={load} onFlash={flash} />
+        <PlacesCard tripId={id} places={list} days={days} dayOf={dayOf} onChanged={load} onFlash={flash} />
         <div className="stack">
           <ShareCard tripId={id} share={share} onChanged={load} onFlash={flash} />
           <PhotosCard tripId={id} shares={shares} places={list} onChanged={load} onFlash={flash} />
@@ -171,12 +174,14 @@ function PlacesCard({
   tripId,
   places: list,
   days,
+  dayOf,
   onChanged,
   onFlash,
 }: {
   tripId: number;
   places: Place[];
   days: Day[];
+  dayOf: Map<number, number>;
   onChanged: () => void;
   onFlash: (m: string) => void;
 }) {
@@ -243,7 +248,7 @@ function PlacesCard({
       <div className="divider" />
       <div className="list">
         {list.map((p) => (
-          <PlaceRow key={p.id} place={p} days={days} onChanged={onChanged} onFlash={onFlash} />
+          <PlaceRow key={p.id} place={p} days={days} dayOf={dayOf} onChanged={onChanged} onFlash={onFlash} />
         ))}
         {list.length === 0 && <div className="muted">Aucun lieu.</div>}
       </div>
@@ -255,11 +260,13 @@ function PlacesCard({
 function PlaceRow({
   place: p,
   days,
+  dayOf,
   onChanged,
   onFlash,
 }: {
   place: Place;
   days: Day[];
+  dayOf: Map<number, number>;
   onChanged: () => void;
   onFlash: (m: string) => void;
 }) {
@@ -267,7 +274,7 @@ function PlaceRow({
   const [name, setName] = useState(p.name);
   const [lat, setLat] = useState(p.lat?.toString() ?? "");
   const [lng, setLng] = useState(p.lng?.toString() ?? "");
-  const [dayId, setDayId] = useState(p.day_id?.toString() ?? "");
+  const [dayId, setDayId] = useState(dayOf.get(p.id)?.toString() ?? "");
 
   return (
     <div className="list-item" style={{ flexDirection: open ? "column" : "row", alignItems: open ? "stretch" : "center" }}>
@@ -325,7 +332,7 @@ function PlaceRow({
             <strong>{p.name}</strong>
             <div className="muted">
               {p.lat !== null && p.lng !== null ? `${p.lat.toFixed(4)}, ${p.lng.toFixed(4)}` : "pas de coordonnées"}
-              {days.find((d) => d.id === p.day_id) ? ` · J${days.find((d) => d.id === p.day_id)!.day_number}` : ""}
+              {days.find((d) => d.id === dayOf.get(p.id)) ? ` · J${days.find((d) => d.id === dayOf.get(p.id))!.day_number}` : ""}
             </div>
           </div>
           <div className="row">

@@ -77,7 +77,7 @@ export function App() {
   return (
     <div className="app">
       <header className="topbar">
-        <h1>TREK</h1>
+        <h1>Trippy</h1>
         <button className="ghost" onClick={() => navigate(route.name === "journeys" || route.name === "journey" ? "/journeys" : "/")}>
           {route.name === "journeys" || route.name === "journey" ? "Journaux" : "Voyages"}
         </button>

@@ -15,7 +15,7 @@ export async function cachedJson(
   const hit = await cache.match(key).catch(() => null);
   if (hit) {
     const h = new Response(hit.body, hit);
-    h.headers.set("x-trek-cache", "HIT");
+    h.headers.set("x-trippy-cache", "HIT");
     return h;
   }
   const res = await producer();
@@ -23,7 +23,7 @@ export async function cachedJson(
     const copy = res.clone();
     copy.headers.set("cache-control", `public, max-age=${ttlSec}`);
     c.executionCtx.waitUntil(cache.put(key, copy).catch(() => null));
-    res.headers.set("x-trek-cache", "MISS");
+    res.headers.set("x-trippy-cache", "MISS");
     return res;
   }
   return res;
