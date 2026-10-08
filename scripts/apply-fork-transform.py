@@ -45,7 +45,6 @@ SUBS: list[tuple[str, str, str]] = [
     # ---- Wordmark dans l'interface ----
     ("web/index.html", 'content="TREK"', 'content="Trippy"'),
     ("web/index.html", "<title>TREK — voyages & photos</title>", "<title>Trippy — carnets & adresses</title>"),
-    ("web/src/App.tsx", "<h1>TREK</h1>", "<h1>Trippy</h1>"),
     ("web/src/pages/Login.tsx", "<h2>TREK</h2>", "<h2>Trippy</h2>"),
     ("web/src/pages/SharedTrip.tsx", "<h1>TREK — partage</h1>", "<h1>Trippy — partage</h1>"),
 ]

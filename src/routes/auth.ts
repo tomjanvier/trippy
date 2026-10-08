@@ -45,6 +45,23 @@ export async function uniqueUsernameFromEmail(db: D1Database, email: string): Pr
 
 const auth = new Hono<{ Bindings: Env }>();
 
+/**
+ * Le secret de session est obligatoire. S'il manque, AUCUNE session ne peut être
+ * signée : l'inscription crée le compte puis échoue, et la connexion échoue.
+ *
+ * On le vérifie en amont, explicitement, pour deux raisons :
+ *  - sans cela, un `catch` trop large autour de l'inscription transforme
+ *    l'erreur de configuration en « nom déjà pris », ce qui envoie l'utilisateur
+ *    chercher un problème d'identifiant qui n'existe pas — et laisse un compte
+ *    orphelin en base à chaque essai ;
+ *  - sur une instance auto-hébergée, l'erreur la plus fréquente est justement
+ *    « j'ai oublié le secret ». Elle mérite son propre code.
+ */
+export function missingSecret(c: AppContext): Response | null {
+  if (c.env.JWT_SECRET) return null;
+  return c.json({ error: "server_misconfigured", reason: "JWT_SECRET absent" }, 500);
+}
+
 async function checkRate(c: AppContext, scope: string): Promise<Response | null> {
   const r = await rateLimit(c.env, `auth-${scope}:${clientIp(c)}`, 10, 60);
   if (!r.ok) {
@@ -56,6 +73,8 @@ async function checkRate(c: AppContext, scope: string): Promise<Response | null>
 auth.post("/register", async (c) => {
   const limited = await checkRate(c, "register");
   if (limited) return limited;
+  const unconfigured = missingSecret(c);
+  if (unconfigured) return unconfigured;
   const parsed = registerSchema.safeParse(await readJson(c));
   if (!parsed.success) return err(c, "bad_request", 400, { issues: fmtIssues(parsed.error) });
   const { email, password } = parsed.data;
@@ -63,24 +82,33 @@ auth.post("/register", async (c) => {
   if (!username) username = await uniqueUsernameFromEmail(c.env.DB, email);
   const salt = newSalt();
   const password_hash = `${salt}$${await hashPassword(password, salt)}`;
+
+  // Le `try` ne couvre QUE l'insertion. C'était une erreur de le faire englober
+  // la signature du jeton : une erreur de configuration devenait alors un conflit
+  // d'identifiant, et le compte restait créé en base sans que personne ne puisse
+  // s'y connecter.
+  let user: SessionUser;
   try {
     const res = await c.env.DB.prepare("INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)")
       .bind(username, email, password_hash)
       .run();
-    const user: SessionUser = { id: Number(res.meta.last_row_id), username, email, role: "user" };
-    const maxAge = 30 * 24 * 3600;
-    const token = await signSession(c.env.JWT_SECRET, user, maxAge);
-    return c.json({ user, token }, 200, {
-      "Set-Cookie": `trippy_session=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}`,
-    });
+    user = { id: Number(res.meta.last_row_id), username, email, role: "user" };
   } catch {
     return err(c, "username_or_email_taken", 409);
   }
+
+  const maxAge = 30 * 24 * 3600;
+  const token = await signSession(c.env.JWT_SECRET, user, maxAge);
+  return c.json({ user, token }, 200, {
+    "Set-Cookie": `trippy_session=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}`,
+  });
 });
 
 auth.post("/login", async (c) => {
   const limited = await checkRate(c, "login");
   if (limited) return limited;
+  const unconfigured = missingSecret(c);
+  if (unconfigured) return unconfigured;
   // Ménage des clés d'idempotence expirées, une fois par connexion : la table ne
   // grossit pas indéfiniment sans coût sur le chemin des mutations.
   c.executionCtx.waitUntil(

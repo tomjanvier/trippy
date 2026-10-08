@@ -28,7 +28,7 @@ export function Login({ onDone }: { onDone: () => void }) {
       <form className="card stack auth-wrap" onSubmit={submit}>
         <div>
           <h2>Trippy</h2>
-          <div className="muted">Voyages, lieux et photos partagées — sur Cloudflare.</div>
+          <div className="muted">Ton atlas de voyage : les pays, les photos, les bonnes adresses.</div>
         </div>
         <div>
           <label htmlFor="email">Email</label>

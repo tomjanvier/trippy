@@ -5,6 +5,7 @@ import type { Env } from "./env";
 import { extractToken, optionalAuth, verifySession } from "./auth";
 import { assertTripAccess, getShareByToken } from "./db/client";
 import { err } from "./lib/http";
+import { PROJECT_VERSION } from "./lib/project";
 import { idempotency } from "./lib/idempotency";
 import { requireAuth } from "./auth";
 import authRoutes from "./routes/auth";
@@ -54,7 +55,22 @@ app.use(
 app.use("/api/*", optionalAuth);
 app.use("/api/*", idempotency);
 
-app.get("/api/health", (c) => c.json({ ok: true, service: "trippy", time: new Date().toISOString() }));
+/**
+ * Sonde de santé. `configured` indique si les secrets nécessaires au
+ * fonctionnement existent — sur une instance auto-hébergée, l'oubli de
+ * `JWT_SECRET` est de loin le problème le plus fréquent, et il est invisible
+ * sinon : l'application se charge, la page s'affiche, et la seule connexion
+ * échoue. Un booléen ne révèle rien de secret.
+ */
+app.get("/api/health", (c) =>
+  c.json({
+    ok: true,
+    service: "trippy",
+    version: PROJECT_VERSION,
+    time: new Date().toISOString(),
+    configured: { jwt: !!c.env.JWT_SECRET },
+  }),
+);
 
 app.route("/api/auth", authRoutes);
 // L'atlas est la page d'accueil : elle se monte avant les voyages pour que la
