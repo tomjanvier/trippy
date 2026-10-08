@@ -102,23 +102,23 @@ export function App() {
   return (
     <div className="app">
       <header className="topbar">
-        <button
-          className="wordmark"
-          onClick={() => navigate("/atlas")}
-          aria-label={`${PROJECT_NAME} — accueil`}
-        >
-          <span className="seal" aria-hidden="true" />
-          {PROJECT_NAME}
-        </button>
-        <nav className="tabs" aria-label="Sections">
+        {/* Le mot-symbole est un <h1> comme chez Trek, pas un bouton : c'est le
+            titre de l'application, et un titre qui est un bouton n'est plus un
+            titre pour un lecteur d'écran. Le bouton d'accueil, c'est l'onglet
+            « Atlas » juste à côté. */}
+        <h1>
+          <button className="wordmark" onClick={() => navigate("/atlas")} aria-label={`${PROJECT_NAME} — accueil`}>
+            <span className="seal" aria-hidden="true" />
+            {PROJECT_NAME}
+          </button>
+        </h1>
+        <div className="row">
           <Tab to="/atlas" label="Atlas" active={route.name === "atlas" || route.name === "country"} />
           <Tab to="/trips" label="Voyages" active={route.name === "trips" || route.name === "trip"} />
           <Tab to="/journeys" label="Journaux" active={route.name === "journeys" || route.name === "journey"} />
-        </nav>
+        </div>
         <span className="spacer" />
-        {/* Le nom de compte est masqué sous 620 px : c'est le moins utile des
-            quatre éléments de la barre. */}
-        <span className="muted who">{user.username}</span>
+        <span className="muted">{user.username}</span>
         <button
           className="ghost"
           onClick={() => {
@@ -151,11 +151,18 @@ export function App() {
   );
 }
 
-/** Un onglet de navigation. `<button>` et non `<a>` : le routage est interne. */
+/**
+ * Un onglet de navigation, au style `ghost` de Trek : transparent, bordure
+ * `--line`, texte `--text`. L'entrée courante se distingue par un fond
+ * `bg-soft` et `aria-current="page"` — pas par un nouveau style.
+ *
+ * Trek avait deux boutons qui se basculaient l'un l'autre ; il y a désormais trois
+ * destinations, donc trois entrées, ce qui est la seule adaptation nécessaire ici.
+ */
 function Tab({ to, label, active }: { to: string; label: string; active: boolean }) {
   return (
     <button
-      className={active ? "tab is-active" : "tab"}
+      className={active ? "ghost on" : "ghost"}
       aria-current={active ? "page" : undefined}
       onClick={() => navigate(to)}
     >

@@ -47,12 +47,6 @@ Forecast and historical weather on the trip page come from **Open-Meteo**
 (`api.open-meteo.com`), which requires no API key and no attribution. See
 <https://open-meteo.com/>.
 
-## Google Fonts — typography
-
-The two families (Archivo and IBM Plex Mono) are self-hosted WOFF2 subsets, both
-under the **SIL Open Font License 1.1**.
-See <https://scripts.sil.org/OFL>.
-
 ## Runtime libraries
 
 React and React DOM (MIT) · Leaflet (BSD-2-Clause) · Hono (MIT) · Zod (MIT) ·

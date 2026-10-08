@@ -132,8 +132,8 @@ migrations/         0001 core · 0002 idempotence · 0003 index · 0004 planific
                     0005 journaux · 0006 atlas
 web/                client React 19 + Vite → build vers ../public
 tests/              52 tests vitest
-scripts/            seed.mjs · build-country-data.mjs · fetch-fonts.mjs ·
-                    reset-password.mjs · apply-fork-transform.py
+scripts/            seed.mjs · build-country-data.mjs · reset-password.mjs ·
+                    apply-fork-transform.py
 ```
 
 | Origine (TREK : Nest + better-sqlite3) | Trippy (Workers) |
@@ -166,7 +166,6 @@ runtime.
 
 ```bash
 node scripts/build-country-data.mjs   # web/src/data/countries.json (250 pays)
-node scripts/fetch-fonts.mjs          # WOFF2 + web/src/fonts.css
 python3 scripts/apply-fork-transform.py --check   # 0 = fork à jour
 node scripts/reset-password.mjs --email <adresse> [--remote]
 ```

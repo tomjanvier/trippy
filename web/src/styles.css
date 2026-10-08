@@ -1,950 +1,334 @@
-/* =============================================================================
-   Trippy — feuille de style unique
-   =============================================================================
-
-   Lecture de la direction (à relire avant de toucher une valeur) :
-
-   Une page d'atlas de voyage ouverte sur une table. Encre et papier, pas une
-   application. Le monde d'où viennent les choix : l'atlas imprimé (traits fins,
-   coins droits, papier un peu jauni), le tampon de passeport (l'encre rouge-brown
-   qui marque une page), la planche-contact argentique (les photos sur une bande,
-   sans coins arrondis ni ombres), le carnet de route (le trait qui relie les
-   étapes).
-
-   Trois interdits assumés, parce qu'ils sont les réflexes par défaut :
-     1. la carte en tuiles Leaflet avec des épingles qui flottent — l'accueil est
-        un SVG dessiné à partir de Natural Earth, sans tuile ni chrome de carte ;
-     2. les cartes-pays en grille de trois colonnes avec drapeau et compteur de
-        photos — la carte EST l'index, la liste est une table des matières
-        typographique ;
-     3. les photos en cartes arrondies ombrées — ici une planche-contact, cadre
-        fileté d'un pixel, angle droit.
-
-   Profondeur : filets et décalages de ton uniquement. Aucune ombre portée dans
-   toute l'application, sauf l'anneau du sceau. Sur fond sombre les ombres ne
-   se lisent pas ; le filet est la profondeur qui fonctionne dans les deux modes.
-
-   Coins : 3 px sur les cadres, 2 px sur les contrôles, capsules sur les
-   pastilles. Mélanger arrondi et droit au hasard est ce qui fait « pas fini » ;
-   la règle est donc écrite et tenue.
-
-   Une seule couleur d'accent, le sceau (`--seal`). Le gris-bleu fait toute la
-   structure ; la couleur ne sert qu'à dire « visité », « actif », « ici ».
-   ========================================================================== */
-
 :root {
-  /* ---- Encre : le texte et ses quatre niveaux ---- */
-  --ink: #e8ecf1; /* titres, valeurs */
-  --ink-2: #a8b4c2; /* corps de texte */
-  --ink-3: #7a8794; /* légendes, métadonnées */
-  --ink-mute: #55616d; /* désactivé, décoratif */
-
-  /* ---- Papier : les surfaces, du fond à la plus haute ---- */
-  --paper: #0e1116; /* la page */
-  --paper-2: #141922; /* barre du haut, bandeaux */
-  --paper-3: #1a202b; /* cartes, panneaux */
-  --paper-4: #0a0d12; /* champs de saisie : ENFONCÉS, donc plus sombres */
-
-  /* ---- Filets ---- */
-  --rule: #262e39; /* séparation standard */
-  --rule-soft: #1c232c; /* séparation discrète */
-  --rule-fort: #37414f; /* emphasis, survol */
-
-  /* ---- Le sceau : l'unique accent. L'encre du tampon. ---- */
-  --seal: #c0603f;
-  --seal-deep: #a84e31; /* fond de bouton : texte clair dessus, contraste 6.7:1 */
-  --seal-ink: #e08a63; /* étiquette ou icône sur fond sombre */
-  --seal-wash: #2a1811; /* fond très dilué, sélection */
-
-  /* Rampe d'encre de la carte, du plus léger au plus chargé. Sur fond sombre,
-     « chargé » veut dire plus CLAIR : voir le commentaire de `.atlas-visited`. */
-  --seal-1: #c0603f;
-  --seal-2: #cd6f4d;
-  --seal-3: #d97e5b;
-  --seal-4: #e08a63;
-  --seal-5: #e89a76;
-  --seal-hover: #f0a888;
-
-  /* ---- La carte ---- */
-  --land: #1c232c; /* pays non visité */
-  --land-line: #2b343f; /* frontières */
-  --graticule: #191f27; /* le réseau de lignes lat/long, à peine visible */
-
-  /* ---- Sémantique ---- */
-  --ok: #4ea87b;
-  --warn: #c08a3e;
-  --err: #d97066;
-  --ok-wash: #14261d;
-  --warn-wash: #2a2014;
-  --err-wash: #2a1614;
-
-  /* ---- Identités de source photo (ce ne sont pas des accents : elles nomment
-         une origine, et servent de légende autant que de couleur) ---- */
-  --ig: #d4577f;
-  --wp: #4a9cbe;
-
-  /* ---- Rayons : règle écrite plus haut ---- */
-  --radius: 3px; /* cadres */
-  --radius-ctl: 2px; /* contrôles */
-  --radius-pill: 999px; /* pastilles */
-
-  /* ---- Rythme ---- */
-  --step: 4px;
-
-  /* ---- Carte au niveau de la surface ---- */
-  --font-sans: "Archivo", ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
-
+  --bg: #0b1120;
+  --bg-soft: #111a2e;
+  --card: #16203a;
+  --line: #24314f;
+  --text: #e6ecff;
+  --muted: #94a3c4;
+  --accent: #4f8cff;
+  --accent-soft: #1e3a8a;
+  --ig: #e1306c;
+  --wp: #38a3c9;
+  --ok: #34d399;
+  --err: #f87171;
+  --radius: 12px;
   color-scheme: dark;
 }
 
-/* Le mode clair est le même système, pas une autre application : mêmes noms de
-   jetons, mêmes contrastes, une autre lumière. */
-@media (prefers-color-scheme: light) {
-  :root {
-    --ink: #15191e;
-    --ink-2: #414a55;
-    --ink-3: #5c6771;
-    --ink-mute: #8b949c;
+* { box-sizing: border-box; }
 
-    --paper: #edeeec;
-    --paper-2: #f4f5f3;
-    --paper-3: #ffffff;
-    --paper-4: #e2e4e2;
-
-    --rule: #d3d7d6;
-    --rule-soft: #e1e4e3;
-    --rule-fort: #b4bab8;
-
-    --seal: #b4553a;
-    --seal-deep: #9a4529;
-    --seal-ink: #9a4529;
-    --seal-wash: #f6eae4;
-
-    /* Sur papier, une encre plus chargée est plus SOMBRE. */
-    --seal-1: #b4553a;
-    --seal-2: #a04c33;
-    --seal-3: #8d4229;
-    --seal-4: #7a381f;
-    --seal-5: #672e16;
-    --seal-hover: #58240f;
-
-    --land: #d7dad8;
-    --land-line: #b9bfbd;
-    --graticule: #e6e8e6;
-
-    --ok: #35795a;
-    --warn: #96702b;
-    --err: #b0453b;
-    --ok-wash: #e6f0ea;
-    --warn-wash: #f4ecdc;
-    --err-wash: #f7e7e5;
-
-    --ig: #b03a5f;
-    --wp: #2f7b99;
-
-    color-scheme: light;
-  }
-}
-
-/* ---------------------------------------------------------------- base */
-
-* {
-  box-sizing: border-box;
-}
-
-html,
-body,
-#root {
-  height: 100%;
-}
+html, body, #root { height: 100%; }
 
 body {
   margin: 0;
-  background: var(--paper);
-  color: var(--ink);
-  font: 400 15px/1.55 var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
-h1,
-h2,
-h3 {
-  color: var(--ink);
-  text-wrap: balance;
-}
+a { color: var(--accent); }
 
-/* Les chiffres qui changent de place doivent pas secouer la mise en page. */
-time,
-.figures,
-.mono {
-  font-variant-numeric: tabular-nums;
-}
-
-a {
-  color: var(--seal-ink);
-  text-underline-offset: 3px;
-}
-
-/* L'anneau de focus : visible au clavier, invisible à la souris. */
-:focus-visible {
-  outline: 2px solid var(--seal);
-  outline-offset: 2px;
-  border-radius: var(--radius-ctl);
-}
-
-/* ---------------------------------------------------------------- coque */
-
-.app {
-  display: flex;
-  flex-direction: column;
-  min-height: 100%;
-}
+.app { display: flex; flex-direction: column; min-height: 100%; }
 
 .topbar {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 0 20px;
-  height: 60px;
-  border-bottom: 1px solid var(--rule);
-  background: var(--paper-2);
-  position: sticky;
-  top: 0;
-  z-index: 20;
+  display: flex; align-items: center; gap: 16px;
+  padding: 12px 20px; border-bottom: 1px solid var(--line);
+  background: var(--bg-soft); position: sticky; top: 0; z-index: 20;
 }
+.topbar h1 { font-size: 16px; margin: 0; letter-spacing: .5px; }
+.topbar .spacer { flex: 1; }
 
-/* Le wordmark : l'empreinte du tampon, en toutes lettres. */
-.topbar h1 {
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  margin: 0;
-  color: var(--ink);
-}
-.topbar .spacer {
-  flex: 1;
-}
-
-/* Le wordmark : l'empreinte du tampon, puis le nom. Le mot est en capitales
-   espacées, l'anneau en terre cuite : le signe précède la signature. */
-.wordmark {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  padding: 0;
-  background: none;
-  border: 0;
-  color: var(--ink);
-  font-weight: 700;
-  font-size: 15px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-.wordmark .seal {
-  width: 17px;
-  height: 17px;
-  border-radius: 50%;
-  /* L'anneau est ouvert en haut à droite, comme une frappe usée. */
-  border: 2.5px solid var(--seal);
-  border-right-color: transparent;
-  transform: rotate(-28deg);
-  flex: none;
-}
-
-/* Les onglets : trois destinations, donc trois entrées. Pas deux boutons qui se
-   basculent l'un l'autre. */
-.tabs {
-  display: flex;
-  gap: 2px;
-  margin-left: 8px;
-}
-.tab {
-  padding: 6px 11px;
-  background: none;
-  border: 1px solid transparent;
-  border-radius: var(--radius-ctl);
-  color: var(--ink-3);
-  font-size: 13.5px;
-  font-weight: 500;
-}
-.tab:hover {
-  color: var(--ink);
-  background: var(--paper-3);
-}
-.tab.is-active {
-  color: var(--ink);
-  /* L'onglet courant se distingue par l'encre du sceau, pas par un aplat : le
-     fond d'un onglet actif alourdirait une barre de 60 px. */
-  border-color: var(--seal);
-  color: var(--seal-ink);
-}
-/* Sur un écran étroit, la barre déborde : mot-symbole, trois onglets, nom de
-   compte et déconnexion ne tiennent pas dans 390 px, et « Déconnexion » était
-   coupé par le bord. Le nom de compte part en premier — c'est l'information la
-   moins utile de la barre — puis le mot-symbole se réduit à son anneau. */
-@media (max-width: 620px) {
-  .topbar {
-    gap: 6px;
-    padding: 0 10px;
-  }
-  .wordmark {
-    font-size: 12px;
-    letter-spacing: 0.06em;
-  }
-  .wordmark .seal {
-    width: 15px;
-    height: 15px;
-  }
-  .tabs {
-    margin-left: 0;
-    flex: none;
-  }
-  .tab {
-    padding: 6px 7px;
-    font-size: 12.5px;
-  }
-  .topbar .who {
-    display: none;
-  }
-}
-/* Sous 400 px, il ne reste que l'anneau : le mot est de nouveau coupé. */
-@media (max-width: 400px) {
-  .wordmark span:not(.seal),
-  .wordmark {
-    font-size: 0;
-  }
-  .wordmark {
-    gap: 0;
-  }
-  .wordmark .seal {
-    width: 18px;
-    height: 18px;
-  }
-  button {
-    padding: 8px 10px;
-  }
-  .topbar > button.ghost {
-    font-size: 12.5px;
-  }
-}
-
-main {
-  flex: 1;
-  padding: 24px 20px 64px;
-  max-width: 1180px;
-  width: 100%;
-  margin: 0 auto;
-}
-
-/* La page d'accueil occupe toute la largeur : la carte a besoin de place. */
-main.atlas {
-  max-width: 1320px;
-}
+main { flex: 1; padding: 20px; max-width: 1100px; width: 100%; margin: 0 auto; }
 
 .card {
-  background: var(--paper-3);
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
-  padding: 16px;
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 16px;
 }
 
-.grid {
-  display: grid;
-  gap: 14px;
-}
-.grid.two {
-  grid-template-columns: 1fr 1fr;
-}
-@media (max-width: 860px) {
-  .grid.two {
-    grid-template-columns: 1fr;
-  }
-}
+.grid { display: grid; gap: 14px; }
+.grid.two { grid-template-columns: 1fr 1fr; }
+@media (max-width: 860px) { .grid.two { grid-template-columns: 1fr; } }
 
-.row {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-.row.end {
-  justify-content: flex-end;
-}
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.row.end { justify-content: flex-end; }
 
-label {
-  display: block;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--ink-3);
-  margin-bottom: 4px;
-}
+label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
 
-/* Champ de saisie : plus SOMBRE que ce qui l'entoure. Un champ reçoit, il est
-   donc en creux, pas en relief. */
-input,
-textarea,
-select {
-  width: 100%;
-  padding: 8px 10px;
-  border-radius: var(--radius-ctl);
-  border: 1px solid var(--rule);
-  background: var(--paper-4);
-  color: var(--ink);
+input, textarea, select {
+  width: 100%; padding: 9px 11px; border-radius: 9px;
+  border: 1px solid var(--line); background: #0e1729; color: var(--text);
   font: inherit;
 }
-input::placeholder,
-textarea::placeholder {
-  color: var(--ink-mute);
-}
-input:focus,
-textarea:focus,
-select:focus {
-  outline: 2px solid var(--seal);
-  outline-offset: -1px;
-  border-color: var(--seal);
-}
+input:focus, textarea:focus, select:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
 
 button {
-  padding: 8px 13px;
-  border-radius: var(--radius-ctl);
-  border: 1px solid transparent;
-  background: var(--seal-deep);
-  color: #fff;
-  font: inherit;
-  font-weight: 500;
-  cursor: pointer;
-  /* Pression tactile : l'app a entendu le clic. */
-  transition: transform 120ms cubic-bezier(0.23, 1, 0.32, 1);
+  padding: 9px 14px; border-radius: 9px; border: 1px solid var(--line);
+  background: var(--accent); color: #fff; font: inherit; cursor: pointer;
 }
-button:active:not(:disabled) {
-  transform: scale(0.97);
-}
-button.ghost {
-  background: transparent;
-  color: var(--ink-2);
-  border-color: var(--rule);
-}
-button.ghost:hover {
-  border-color: var(--rule-fort);
-  color: var(--ink);
-}
-button.danger {
-  background: transparent;
-  color: var(--err);
-  border-color: var(--rule);
-}
-button.danger:hover {
-  border-color: var(--err);
-}
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+button.ghost { background: transparent; color: var(--text); }
+button.danger { background: #7f1d1d; }
+button:disabled { opacity: .55; cursor: not-allowed; }
 
-.error {
-  color: var(--err);
-  font-size: 13px;
-}
-.muted {
-  color: var(--ink-3);
-  font-size: 13px;
-}
-
+.error { color: var(--err); font-size: 13px; }
+.muted { color: var(--muted); font-size: 13px; }
 .pill {
-  display: inline-block;
-  padding: 2px 9px;
-  border-radius: var(--radius-pill);
-  font-size: 11px;
-  font-weight: 500;
-  border: 1px solid var(--rule);
-  color: var(--ink-3);
+  display: inline-block; padding: 2px 8px; border-radius: 999px;
+  font-size: 11px; border: 1px solid var(--line); color: var(--muted);
 }
-.pill.instagram {
-  border-color: var(--ig);
-  color: var(--ig);
-}
-.pill.wordpress {
-  border-color: var(--wp);
-  color: var(--wp);
-}
-.pill.upload {
-  border-color: var(--seal);
-  color: var(--seal-ink);
-}
+.pill.instagram { border-color: var(--ig); color: var(--ig); }
+.pill.wordpress { border-color: var(--wp); color: var(--wp); }
+.pill.upload { border-color: var(--accent); color: var(--accent); }
 
-.list {
-  display: grid;
-  gap: 10px;
-}
+.list { display: grid; gap: 10px; }
 .list-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
-  background: var(--paper-2);
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg-soft);
 }
 
-.map {
-  height: 420px;
-  border-radius: var(--radius);
-  overflow: hidden;
-  border: 1px solid var(--rule);
-}
-.map.small {
-  height: 320px;
-}
+.map { height: 420px; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); }
+.map.small { height: 320px; }
 
-.thumbs {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
+.thumbs { display: flex; gap: 8px; flex-wrap: wrap; }
 .thumb {
-  position: relative;
-  width: 84px;
-  height: 84px;
-  border-radius: var(--radius);
-  overflow: hidden;
-  border: 1px solid var(--rule);
-  background: var(--paper-4);
+  position: relative; width: 84px; height: 84px; border-radius: 8px; overflow: hidden;
+  border: 1px solid var(--line); background: #0a1222;
 }
-.thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
+.thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .thumb .x {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  background: #000a;
-  color: #fff;
-  border: 0;
-  border-radius: var(--radius-ctl);
-  padding: 0 5px;
-  font-size: 13px;
-  cursor: pointer;
+  position: absolute; top: 2px; right: 2px; background: #000a; color: #fff;
+  border: 0; border-radius: 6px; padding: 0 5px; font-size: 13px; cursor: pointer;
 }
 
-.leaflet-popup-content {
-  margin: 10px 12px;
-  font-size: 13px;
-}
-.auth-wrap {
-  max-width: 400px;
-  margin: 12vh auto;
-}
-.stack {
-  display: grid;
-  gap: 12px;
-}
-h2 {
-  font-size: 19px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  margin: 0 0 4px;
-}
-/* Titre de panneau : ce n'est PAS un sur-titre en capitales espacées. Ces
-   majuscules-small-font étaient appliquées à chaque `h3` de l'application,
-   ce qui donnait le même rythme templaté partout. */
-h3 {
-  font-size: 14px;
-  font-weight: 600;
-  margin: 0 0 8px;
-  color: var(--ink);
-}
-.divider {
-  height: 1px;
-  background: var(--rule);
-  margin: 4px 0;
-}
-
+.leaflet-popup-content { margin: 10px 12px; font-size: 13px; }
+.auth-wrap { max-width: 400px; margin: 8vh auto; }
+.stack { display: grid; gap: 12px; }
+h2 { font-size: 17px; margin: 0 0 4px; }
+h3 { font-size: 14px; margin: 0 0 8px; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; }
+.divider { height: 1px; background: var(--line); margin: 4px 0; }
 /* =============================================================================
-   L'atlas
+   L'atlas — la page d'accueil
+   -----------------------------------------------------------------------------
+   Ajout minimal à la feuille de Trek : aucune valeur existante n'est modifiée,
+   aucune police n'est introduite, aucun mode clair n'est ajouté. Tout ce qui
+   suit utilise les jetons déjà déclarés en haut du fichier (--bg, --card,
+   --line, --accent…), donc l'atlas est cohérent avec le reste de l'application
+   sans avoir à retoucher une seule de ses règles.
+
+   La carte n'est pas Leaflet : il n'y a rien à zoomer sur un planisphère, et
+   des tuiles apporteraient 300 Ko pour dessiner exactement les mêmes formes.
+   Un pays visité est plein à l'accent ; l'intensité du bleu encode le nombre
+   d'allers-retours ; un fil relie les pays par grands cercles.
    ========================================================================== */
 
-/* La pastille d'en-tête, en petites capitales espacées. Réservée : elle ne doit
-   pas se retrouver au-dessus de chaque titre de section, sinon la page entier
-   bat à un rythme de gabarit. */
-.eyebrow {
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  font-weight: 500;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--ink-3);
-}
-
-/* ---- La carte du monde ---- */
+/* ---- La carte ---- */
 .atlas-map {
   position: relative;
   width: 100%;
-  /* La carte respire dans la largeur, garde une hauteur bornée pour que la
-     table des matières reste visible sans défiler. Sur téléphone, le 2:1 ne
-     laisserait que 173 px de haut : on passe à 3:2, et c'est la table des
-     matières qui porte le clic sur les petits pays. */
   aspect-ratio: 2 / 1;
   max-height: 68vh;
-  background: var(--paper);
-  border: 1px solid var(--rule);
+  background: var(--bg);
+  border: 1px solid var(--line);
   border-radius: var(--radius);
   overflow: hidden;
 }
+.atlas-map svg { display: block; width: 100%; height: 100%; }
 
-.atlas-map svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-/* Pays non visité : présent mais muet. Il fait le fond, pas le sujet. */
+/* Pays non visité : présent mais discret. Il fait le fond, pas le sujet. */
 .atlas-land {
-  fill: var(--land);
-  stroke: var(--land-line);
+  fill: #16203a;
+  stroke: #24314f;
   stroke-width: 0.4;
   stroke-linejoin: round;
   vector-effect: non-scaling-stroke;
-  transition: fill 140ms cubic-bezier(0.23, 1, 0.32, 1);
 }
-
-/* Le réseau lat/long : à peine là, comme sur une vraie carte. */
+/* Le réseau lat/long, à peine visible — comme sur une vraie carte. */
 .atlas-graticule {
   fill: none;
-  stroke: var(--graticule);
+  stroke: #131c30;
   stroke-width: 0.5;
   vector-effect: non-scaling-stroke;
 }
 
-/* Le fil de voyage : LE signe de l'atlas. Relie les pays dans l'ordre des
+/* Le fil de voyage : le signe de l'atlas. Relie les pays dans l'ordre des
    visites, comme on relie des étapes à la main sur une carte. */
 .atlas-thread {
   fill: none;
-  stroke: var(--seal);
+  stroke: var(--accent);
   stroke-width: 1.1;
   stroke-linecap: round;
   stroke-linejoin: round;
   vector-effect: non-scaling-stroke;
-  opacity: 0.55;
+  opacity: 0.5;
   pointer-events: none;
 }
-
-/* Les extrémités du fil : un trou perforé dans l'encre. Le disque est de la
-   couleur du papier, pas du sceau — sur un pays déjà colorié, un point du même
-   terre cuite disparaîtrait ; un disque vide se lit comme un trou, comme sur une
-   carte dessinée à la main. */
+/* Les extrémités du fil : un disque de la couleur du fond, c'est-à-dire un trou
+   perforé dans l'encre. Un point du même bleu que le pays disparaîtrait. */
 .atlas-stop {
-  fill: var(--paper);
-  stroke: var(--seal);
+  fill: var(--bg);
+  stroke: var(--accent);
   stroke-width: 1.2;
   vector-effect: non-scaling-stroke;
   pointer-events: none;
 }
 
-/* Un pays visité.
- *
- * La densité d'encre encode le nombre d'allers-retours, mais le SENS de la rampe
- * dépend du mode, et c'est délibéré :
- *   - sur papier, une encre plus chargée est une encre PLUS SOMBRE ;
- *   - sur fond sombre, une encre plus chargée est une encre PLUS CLAIRE.
- * Réutiliser la même rampe dans les deux donnerait, en mode sombre, un pays
- * fréquenté plus terne qu'un pays visité une fois — l'inverse du message.
- *
- * Cinq paliers : au-delà, l'œil ne distingue plus deux nuances et l'encodage
- * promet une précision qu'il n'a pas. Le nombre est ramené à 5 dans AtlasMap.tsx.
- */
+/* Un pays visité. Cinq paliers : au-delà, l'œil ne distingue plus deux nuances
+   et l'encodage promet une précision qu'il n'a pas. Sur fond sombre, une encre
+   plus chargée est une encre plus CLAIRE. */
 .atlas-visited {
-  fill: var(--seal-1);
-  stroke: var(--paper);
+  fill: #35619f;
+  stroke: var(--bg);
   stroke-width: 0.6;
   stroke-linejoin: round;
   vector-effect: non-scaling-stroke;
   cursor: pointer;
-  transition: fill 140ms cubic-bezier(0.23, 1, 0.32, 1);
+  transition: fill 140ms ease;
 }
-.atlas-visited[data-visits="2"] { fill: var(--seal-2); }
-.atlas-visited[data-visits="3"] { fill: var(--seal-3); }
-.atlas-visited[data-visits="4"] { fill: var(--seal-4); }
-.atlas-visited[data-visits="5"] { fill: var(--seal-5); }
+.atlas-visited[data-visits="2"] { fill: #4279cc; }
+.atlas-visited[data-visits="3"] { fill: var(--accent); }
+.atlas-visited[data-visits="4"] { fill: #7db1ff; }
+.atlas-visited[data-visits="5"] { fill: #a9cbff; }
 .atlas-visited:hover,
 .atlas-visited:focus-visible {
-  fill: var(--seal-hover);
-  stroke: var(--ink);
+  fill: #8ab4ff;
+  stroke: var(--text);
   outline: none;
 }
 
-.atlas-label {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.06em;
-  fill: var(--ink-2);
+/* Étiquette du pays survolé : elle n'apparaît que pendant le survol, pour que la
+   carte reste calme au repos. */
+.atlas-tip {
+  font-size: 10px;
+  fill: var(--text);
   pointer-events: none;
   paint-order: stroke;
-  stroke: var(--paper);
+  stroke: var(--bg);
   stroke-width: 2.5px;
   stroke-linejoin: round;
 }
-
-/* Le pays survolé ou focalisé : nom et années dans une étiquette à côté. */
-.atlas-tip {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.04em;
-  fill: var(--ink);
-  pointer-events: none;
-}
-
-/* L'étiquette de coordonnées, en bas à gauche de la carte. */
 .atlas-scale {
   position: absolute;
   left: 10px;
   bottom: 8px;
-  font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.08em;
-  color: var(--ink-mute);
+  color: var(--muted);
   pointer-events: none;
 }
 
-@media (max-width: 640px) {
-  .atlas-map {
-    aspect-ratio: 3 / 2;
-  }
-  .atlas-scale {
-    font-size: 9px;
-  }
-}
-
-/* ---- Les compteurs de l'accueil ----
-   Un chiffre unique en grand, et son libellé en dessous. Le libellé est en
-   `ink-3` et petit : le chiffre domine. */
-.atlas-figures {
-  display: flex;
-  gap: 32px;
-  flex-wrap: wrap;
-  align-items: baseline;
-}
-.atlas-figure {
-  display: grid;
-  gap: 2px;
-}
+/* ---- Les compteurs : un chiffre, puis son libellé. Le chiffre domine. ---- */
+.atlas-figures { display: flex; gap: 32px; flex-wrap: wrap; align-items: baseline; }
+.atlas-figure { display: grid; gap: 2px; }
 .atlas-figure b {
-  font-family: var(--font-mono);
   font-size: 30px;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1;
   letter-spacing: -0.02em;
-  color: var(--ink);
+  color: var(--text);
   font-variant-numeric: tabular-nums;
 }
-.atlas-figure span {
-  font-size: 12px;
-  color: var(--ink-3);
-}
+.atlas-figure span { font-size: 12px; color: var(--muted); }
 
 /* ---- La table des matières : un index typographique, pas une grille de cartes.
    Filet sous chaque entrée, nom à gauche, années et compteurs à droite. ---- */
-.toc {
-  display: grid;
-  gap: 0;
-  border-top: 1px solid var(--rule);
-}
+.toc { display: grid; gap: 0; border-top: 1px solid var(--line); }
 .toc-row {
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: baseline;
   gap: 12px;
-  padding: 9px 2px;
-  border-bottom: 1px solid var(--rule-soft);
-  color: inherit;
-  text-decoration: none;
-  cursor: pointer;
-  background: none;
+  width: 100%;
+  padding: 9px 4px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
   border-radius: 0;
+  background: none;
+  color: inherit;
   font: inherit;
   text-align: left;
-  width: 100%;
+  cursor: pointer;
 }
-.toc-row:hover {
-  background: var(--paper-2);
-}
-.toc-name {
-  display: flex;
-  align-items: baseline;
-  gap: 9px;
-  min-width: 0;
-}
+.toc-row:hover { background: var(--bg-soft); }
+.toc-name { display: flex; align-items: baseline; gap: 9px; min-width: 0; }
 .toc-name b {
-  font-weight: 500;
-  color: var(--ink);
+  font-weight: 600;
+  color: var(--text);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.toc-flag {
-  /* Le drapeau n'est pas décoratif : il identifie le pays d'un coup d'œil dans
-     une liste de noms. `font-variant-emoji` l'aligne sur la ligne. */
-  font-variant-emoji: emoji;
-  font-size: 14px;
-  line-height: 1;
-  flex: none;
-}
+.toc-flag { font-size: 14px; line-height: 1; flex: none; }
 .toc-note {
   display: block;
   font-size: 12.5px;
-  color: var(--ink-3);
+  font-weight: 400;
+  color: var(--muted);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  margin-top: 2px;
 }
 .toc-meta {
   display: flex;
   gap: 10px;
   align-items: baseline;
-  font-family: var(--font-mono);
   font-size: 11.5px;
-  color: var(--ink-3);
+  color: var(--muted);
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
-.toc-meta .n {
-  /* Les compteurs sont l'accessoire, pas le sujet : ils s'effacent d'un cran
-     sous les années. */
-  color: var(--ink-mute);
-  font-size: 10.5px;
-}
-.toc-meta .n + .n::before {
-  content: "·";
-  margin-right: 8px;
-  color: var(--rule-fort);
-}
+.toc-meta .n { color: var(--muted); opacity: 0.75; font-size: 10.5px; }
+.toc-meta .n + .n::before { content: "·"; margin-right: 8px; }
 
 /* Un pays enregistré mais absent des contours disponibles : on le dit, plutôt
    que de le laisser disparaître sans raison. */
 .toc-offmap {
-  font-family: var(--font-mono);
   font-size: 10px;
-  color: var(--warn);
+  color: var(--err);
   border: 1px solid currentColor;
-  border-radius: var(--radius-pill);
+  border-radius: 999px;
   padding: 0 6px;
 }
 
-/* ---- Planche-contact : les photos sur une bande, cadre fileté, angle droit.
-   Pas d'ombre, pas d'arrondi : les photos ne sont pas des cartes. ---- */
+/* ---- Planche-contact : les photos sur une bande, cadre fileté, angle droit,
+   pas d'ombre. Le filet vient de la grille, pas de chaque cadre. ---- */
 .contact {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
   gap: 1px;
-  background: var(--rule); /* le filet vient de la grille, pas de chaque cadre */
-  border: 1px solid var(--rule);
+  background: var(--line);
+  border: 1px solid var(--line);
   border-radius: var(--radius);
   overflow: hidden;
 }
-.contact figure {
-  margin: 0;
-  background: var(--paper-3);
-  position: relative;
-}
-.contact img {
-  display: block;
-  width: 100%;
-  aspect-ratio: 4 / 5;
-  object-fit: cover;
-}
+.contact figure { margin: 0; background: var(--card); position: relative; }
+.contact img { display: block; width: 100%; aspect-ratio: 4 / 5; object-fit: cover; }
 .contact figcaption {
-  padding: 6px 8px 7px;
-  font-size: 11.5px;
-  color: var(--ink-3);
-  border-top: 1px solid var(--rule-soft);
   display: flex;
   gap: 6px;
   align-items: baseline;
+  padding: 6px 8px 7px;
+  font-size: 11.5px;
+  color: var(--muted);
+  border-top: 1px solid var(--line);
 }
-.contact figcaption time {
-  font-family: var(--font-mono);
-  color: var(--ink-mute);
-  flex: none;
-}
-.contact .drop {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-}
-.contact-empty {
-  border: 1px dashed var(--rule-fort);
-  border-radius: var(--radius);
-  padding: 26px 18px;
-  text-align: center;
-  color: var(--ink-3);
-  font-size: 13.5px;
-}
+.contact .drop { position: absolute; top: 4px; right: 4px; }
 
-/* ---- Les bonnes adresses : une liste, pas une grille de cartes.
-   Le `verdict` est ce qui vaut le coup : il est donc en grand, et le nom
-   au-dessus en petites capitales. ---- */
-.finds {
-  display: grid;
-  gap: 0;
-  border-top: 1px solid var(--rule);
-}
+/* ---- Les bonnes adresses : une liste, pas une grille de cartes. ---- */
+.finds { display: grid; gap: 0; border-top: 1px solid var(--line); }
 .find {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 2px 14px;
-  padding: 13px 2px;
-  border-bottom: 1px solid var(--rule-soft);
+  padding: 13px 4px;
+  border-bottom: 1px solid var(--line);
 }
-.find-name {
-  grid-column: 1;
-  font-weight: 600;
-  color: var(--ink);
-  font-size: 15.5px;
-}
-.find-city {
-  grid-column: 1;
-  font-size: 12px;
-  color: var(--ink-3);
-}
-
-/* L'en-tête de groupe : le libellé en petites capitales d'encre du sceau, et
-   l'aide qui explique la catégorie. L'aide passe à la ligne plutôt que de se
-   faire couper au milieu d'une expression. */
-.find-group {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-bottom: 2px;
-}
-.find-group h3 {
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  font-weight: 500;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--seal-ink);
-  margin: 0;
-}
-.find-group-hint {
-  margin: 0;
-  font-size: 12px;
-  color: var(--ink-3);
-}
+.find-name { grid-column: 1; font-weight: 600; color: var(--text); font-size: 15.5px; }
+.find-city { grid-column: 1; font-size: 12px; color: var(--muted); }
 .find-verdict {
   grid-column: 1 / -1;
   margin: 4px 0 0;
   font-size: 14.5px;
-  color: var(--ink-2);
+  color: var(--text);
   max-width: 62ch;
-  text-wrap: pretty;
 }
 .find-meta {
   grid-row: 1 / span 2;
@@ -954,14 +338,23 @@ h3 {
   display: flex;
   gap: 8px;
   align-items: baseline;
-  font-family: var(--font-mono);
   font-size: 11.5px;
-  color: var(--ink-3);
+  color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
-.find-meta a {
-  color: var(--ink-3);
+.find-meta a { color: var(--muted); }
+
+/* L'en-tête de groupe : catégorie en petites capitales d'accent, et l'aide qui
+   explique la catégorie, qui passe à la ligne plutôt que d'être coupée. */
+.find-group {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 2px;
 }
+.find-group h3 { margin: 0; font-size: 12px; }
+.find-group-hint { margin: 0; font-size: 12px; font-weight: 400; color: var(--muted); }
 
 /* ---- La page d'un pays ---- */
 .country-head {
@@ -970,119 +363,69 @@ h3 {
   gap: 8px 20px;
   align-items: end;
   padding-bottom: 16px;
-  border-bottom: 1px solid var(--rule);
+  border-bottom: 1px solid var(--line);
   margin-bottom: 20px;
 }
-.country-title {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  min-width: 0;
-}
-.country-title h2 {
-  font-size: 30px;
-  letter-spacing: -0.02em;
-  margin: 0;
-}
-.country-title .flag {
-  font-size: 24px;
-  line-height: 1;
-}
+.country-title { display: flex; align-items: baseline; gap: 12px; min-width: 0; }
+.country-title h2 { margin: 0; font-size: 28px; }
+.country-title .flag { font-size: 24px; line-height: 1; }
 .country-when {
-  font-family: var(--font-mono);
   font-size: 12.5px;
-  color: var(--ink-3);
+  color: var(--muted);
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 .country-note {
   grid-column: 1 / -1;
   font-size: 15px;
-  color: var(--ink-2);
+  color: var(--text);
   max-width: 60ch;
-  text-wrap: pretty;
 }
-.country-story {
-  grid-column: 1 / -1;
-  max-width: 68ch;
-  color: var(--ink-2);
-  white-space: pre-wrap;
-  text-wrap: pretty;
-}
+.country-story { grid-column: 1 / -1; max-width: 68ch; color: var(--muted); white-space: pre-wrap; }
 
 @media (max-width: 720px) {
-  .country-head {
-    grid-template-columns: 1fr;
-  }
-  .country-when {
-    text-align: left;
-  }
-  .find {
-    grid-template-columns: 1fr;
-  }
-  .find-meta {
-    grid-row: auto;
-    grid-column: 1;
-  }
+  .country-head { grid-template-columns: 1fr; }
+  .country-when { text-align: left; }
+  .find { grid-template-columns: 1fr; }
+  .find-meta { grid-row: auto; grid-column: 1; justify-content: flex-start; }
+  .atlas-map { aspect-ratio: 3 / 2; }
 }
 
-/* ---- Le pied de page : l'offre de code source exigée par l'AGPL §13 ---- */
-.colophon {
-  margin-top: 40px;
-  padding-top: 16px;
-  border-top: 1px solid var(--rule);
-  display: flex;
-  gap: 12px 20px;
-  flex-wrap: wrap;
-  align-items: baseline;
-  font-size: 11.5px;
-  color: var(--ink-mute);
+/* ---- Le mot-symbole de la barre du haut ---- */
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
 }
-.colophon a {
-  color: var(--ink-3);
+.wordmark .seal {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  /* L'anneau est ouvert en haut à droite, comme une frappe usée. */
+  border: 2.5px solid var(--accent);
+  border-right-color: transparent;
+  transform: rotate(-28deg);
+  flex: none;
 }
 
-/* ---- États : chargement, vide, erreur. ---- */
+/* ---- États : chargement et vide. Le squelette reprend la forme de la mise en
+   page finale, donc rien ne saute à l'arrivée. ---- */
 .skeleton {
-  background: linear-gradient(90deg, var(--paper-2) 25%, var(--paper-3) 37%, var(--paper-2) 63%);
-  background-size: 400% 100%;
-  animation: shimmer 1.4s ease-in-out infinite;
+  background: var(--bg-soft);
   border-radius: var(--radius);
 }
-@keyframes shimmer {
-  0% {
-    background-position: 100% 0;
-  }
-  100% {
-    background-position: 0 0;
-  }
-}
-/* Sous mouvement réduit, le dégradé reste mais ne scintille plus : la forme du
-   squelette doit toujours correspondre à la mise en page finale. */
-@media (prefers-reduced-motion: reduce) {
-  .skeleton {
-    animation: none;
-    background: var(--paper-2);
-  }
-  .atlas-visited,
-  .atlas-land {
-    transition: none;
-  }
-  button {
-    transition: none;
-  }
-}
-
 .empty {
-  border: 1px dashed var(--rule-fort);
+  border: 1px dashed var(--line);
   border-radius: var(--radius);
-  padding: 28px 20px;
+  padding: 26px 20px;
   text-align: center;
-  color: var(--ink-3);
+  color: var(--muted);
 }
-.empty b {
-  display: block;
-  color: var(--ink-2);
-  font-weight: 500;
-  margin-bottom: 4px;
-}
+.empty b { display: block; color: var(--text); font-weight: 600; margin-bottom: 4px; }
+
+/* Onglet courant : un fond `bg-soft`, comme le reste de l'application. */
+.ghost.on { background: var(--bg-soft); color: var(--text); }
